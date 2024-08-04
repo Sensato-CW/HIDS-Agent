@@ -97,6 +97,8 @@ run_install() {
 
     # Use a here-document to provide the required inputs
     sudo ./install.sh << EOF
+# Send ENTER to proceed from the initial prompt
+\r
 agent
 y
 y
