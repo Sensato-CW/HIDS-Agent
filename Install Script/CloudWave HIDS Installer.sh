@@ -91,84 +91,34 @@ check_license() {
     fi
 }
 
-# Function to install dependencies and CloudWave HIDS Agent (OSSEC) on Debian-based systems
-install_debian() {
-    echo "Installing CloudWave HIDS Agent on a Debian-based system..."
+# Function to run the OSSEC install script with simulated input
+run_install() {
+    echo "Running OSSEC installer with simulated input..."
 
-    sudo apt-get update
-    sudo apt-get install -y build-essential inotify-tools zlib1g-dev libpcre2-dev libevent-dev
-
-    wget https://github.com/ossec/ossec-hids/archive/master.tar.gz -O ossec.tar.gz
-    tar -zxvf ossec.tar.gz
-
-    cd ossec-hids-master
-
-    # Automate the response to the installation prompt
-    echo -e "agent\n" | sudo ./install.sh
-
-    sudo /var/ossec/bin/ossec-control start
-
-    echo "CloudWave HIDS Agent installation completed on Debian-based system."
+    # Expect the script to provide the required inputs
+    {
+        echo "agent"   # Answer for "What kind of installation do you want?"
+        echo "y"       # Answer for "Do you want to run the integrity check daemon?"
+        echo "y"       # Answer for "Do you want to enable active response?"
+        echo "y"       # Answer for "Do you want to start OSSEC HIDS after the installation?"
+    } | sudo ./install.sh
 }
 
-# Function to install dependencies and CloudWave HIDS Agent (OSSEC) on Red Hat-based systems
-install_rhel_based() {
-    echo "Installing CloudWave HIDS Agent on a Red Hat-based system..."
-
-    sudo yum update -y
-    sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel
+# Function to install OSSEC (CloudWave HIDS Agent)
+install_ossec() {
+    echo "Installing CloudWave HIDS Agent..."
 
     wget https://github.com/ossec/ossec-hids/archive/master.tar.gz -O ossec.tar.gz
     tar -zxvf ossec.tar.gz
 
     cd ossec-hids-master
 
-    # Automate the response to the installation prompt
-    echo -e "agent\n" | sudo ./install.sh
+    # Run the modified install script with automated input
+    run_install
 
     sudo /var/ossec/bin/ossec-control start
 
-    echo "CloudWave HIDS Agent installation completed on Red Hat-based system."
-}
-
-# Function to install dependencies and CloudWave HIDS Agent (OSSEC) on Fedora systems
-install_fedora() {
-    echo "Installing CloudWave HIDS Agent on a Fedora system..."
-
-    sudo dnf update -y
-    sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel
-
-    wget https://github.com/ossec/ossec-hids/archive/master.tar.gz -O ossec.tar.gz
-    tar -zxvf ossec.tar.gz
-
-    cd ossec-hids-master
-
-    # Automate the response to the installation prompt
-    echo -e "agent\n" | sudo ./install.sh
-
-    sudo /var/ossec/bin/ossec-control start
-
-    echo "CloudWave HIDS Agent installation completed on Fedora system."
-}
-
-# Function to install dependencies and CloudWave HIDS Agent (OSSEC) on SUSE systems
-install_suse() {
-    echo "Installing CloudWave HIDS Agent on a SUSE-based system..."
-
-    sudo zypper refresh
-    sudo zypper install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel
-
-    wget https://github.com/ossec/ossec-hids/archive/master.tar.gz -O ossec.tar.gz
-    tar -zxvf ossec.tar.gz
-
-    cd ossec-hids-master
-
-    # Automate the response to the installation prompt
-    echo -e "agent\n" | sudo ./install.sh
-
-    sudo /var/ossec/bin/ossec-control start
-
-    echo "CloudWave HIDS Agent installation completed on SUSE-based system."
+    echo "CloudWave HIDS Agent installation completed."
 }
 
 # Main script execution
@@ -177,20 +127,6 @@ get_system_name
 check_license
 detect_distro
 
-case "$DISTRO" in
-    debian|ubuntu)
-        install_debian
-        ;;
-    centos|rhel|fedora|oracle)
-        install_rhel_based
-        ;;
-    suse|opensuse)
-        install_suse
-        ;;
-    *)
-        echo "Unsupported distribution: $DISTRO $VERSION"
-        exit 1
-        ;;
-esac
+install_ossec
 
 echo "CloudWave HIDS Agent installation script finished."
