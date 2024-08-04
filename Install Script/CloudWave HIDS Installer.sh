@@ -151,7 +151,7 @@ download_and_extract_ossec() {
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
-    sudo "./$OSSEC_BASE_DIR/install.sh" -q
+    sudo ./$OSSEC_BASE_DIR/install.sh -q
     sudo /var/ossec/bin/ossec-control start
     echo "OSSEC installation completed."
 }
