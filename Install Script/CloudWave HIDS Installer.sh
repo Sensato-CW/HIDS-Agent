@@ -95,8 +95,13 @@ check_license() {
 run_install() {
     echo "Running OSSEC installer with simulated input..."
 
-    # Use printf to provide the required inputs
-    printf "agent\ny\ny\ny\n" | sudo ./install.sh
+    # Use a here-document to provide the required inputs
+    sudo ./install.sh << EOF
+agent
+y
+y
+y
+EOF
 }
 
 # Function to install OSSEC (CloudWave HIDS Agent)
