@@ -4,7 +4,7 @@
 OSSEC_DIR="/var/ossec"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
-OSSEC_BASE_DIR="ossec-hids-master"
+OSSEC_BASE_DIR="./ossec-hids-master"
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
@@ -41,7 +41,7 @@ download_csv() {
     echo "Downloading HIDS Keys CSV file..."
 
     # Remove existing file if it exists
-    if [ -f "$CSV_PATH" ];then
+    if [ -f "$CSV_PATH" ]; then
         sudo rm -f "$CSV_PATH"
     fi
 
@@ -57,7 +57,7 @@ import urllib.request
 try:
     urllib.request.urlretrieve('$CSV_URL', '$CSV_PATH')
     print('HIDS Keys CSV file downloaded successfully.')
-except Exception as e
+except Exception as e:
     print(f'Failed to download HIDS Keys CSV file with Python. Installation aborted: {e}')
     exit(1)
 " || exit 1
@@ -87,7 +87,7 @@ check_license() {
     local server_ip=""
 
     # Read the CSV file and check for the system name
-    while IFS=, read -r id asset_name asset_type source_ip key; do
+    while IFS=, read -r id asset_name asset_type source_ip license_key; do
         echo "Checking asset: $asset_name"
         # Skip empty lines or headers
         if [[ -z "$id" || "$id" == "ID" ]]; then
@@ -96,10 +96,10 @@ check_license() {
 
         # Check if the asset name matches the hostname
         if [[ "$asset_name" == "$HOSTNAME" ]]; then
-            echo "System is licensed for CloudWave HIDS Agent. License Key: $key"
+            echo "System is licensed for CloudWave HIDS Agent. License Key: $license_key"
             found=1
             server_ip=$source_ip
-            key=$key
+            key=$license_key
             break
         fi
     done < "$CSV_PATH"
@@ -145,14 +145,20 @@ download_and_extract_ossec() {
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     tar -zxvf ossec.tar.gz
     OSSEC_FOLDER=$(tar -tf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
-    cd $OSSEC_FOLDER
+    mv $OSSEC_FOLDER $OSSEC_BASE_DIR
+    cd $OSSEC_BASE_DIR
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
     sudo ./install.sh -q
-    sudo /var/ossec/bin/ossec-control start
+    if [ -f "/var/ossec/bin/ossec-control" ]; then
+        sudo /var/ossec/bin/ossec-control start
+    else
+        echo "/var/ossec/bin/ossec-control not found. Installation aborted."
+        exit 1
+    fi
     echo "OSSEC installation completed."
 }
 
