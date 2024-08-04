@@ -4,6 +4,7 @@
 OSSEC_DIR="/var/ossec"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
+PRELOADED_VARS_PATH="ossec-hids-master/etc/preloaded-vars.conf"
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
@@ -118,7 +119,7 @@ create_preloaded_vars() {
     local server_ip="$1"
     local key="$2"
     echo "Creating preloaded-vars.conf..."
-    cat << EOF > "ossec-hids-master/etc/preloaded-vars.conf"
+    cat << EOF > "$PRELOADED_VARS_PATH"
 USER_LANGUAGE="en"
 USER_NO_STOP="y"
 USER_INSTALL_TYPE="agent"
@@ -132,9 +133,9 @@ USER_UPDATE="n"
 EOF
 
     # Ensure the configuration file is readable
-    sudo chmod 644 "ossec-hids-master/etc/preloaded-vars.conf"
+    sudo chmod 644 "$PRELOADED_VARS_PATH"
     echo "Preloaded vars file content:"
-    cat "ossec-hids-master/etc/preloaded-vars.conf"
+    cat "$PRELOADED_VARS_PATH"
 }
 
 # Function to download and extract the latest OSSEC version
@@ -156,7 +157,12 @@ find_and_cd_ossec() {
 install_ossec() {
     echo "Installing OSSEC..."
     sudo ./install.sh -q
-    sudo /var/ossec/bin/ossec-control start
+    if [ -f "/var/ossec/bin/ossec-control" ]; then
+        sudo /var/ossec/bin/ossec-control start
+    else
+        echo "/var/ossec/bin/ossec-control not found. Installation aborted."
+        exit 1
+    fi
     echo "OSSEC installation completed."
 }
 
