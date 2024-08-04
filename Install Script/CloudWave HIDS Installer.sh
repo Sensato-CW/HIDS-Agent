@@ -4,7 +4,7 @@
 OSSEC_DIR="/var/ossec"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
-OSSEC_BASE_DIR="/path/to/ossec-hids-master" # Change to the actual base directory
+OSSEC_BASE_DIR="/ossec-hids-master" # Change to the actual base directory
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
