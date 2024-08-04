@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # URL to the HIDS Keys CSV file in the GitHub repository
-CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/d23baf61e2fdaa91bd544f690de881d159f3daac/Install%20Script/HIDS%20Keys.csv"
+CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/976c7b05c6d2b2e98f6a08f332150458b5ac9f79/Install%20Script/HIDS%20Keys.csv"
 
 # Path to download the HIDS Keys CSV file
 CSV_PATH="/tmp/HIDS_Keys.csv"
@@ -61,13 +61,27 @@ check_license() {
         exit 1
     fi
 
-    LICENSE_KEY=$(awk -F, -v hostname="$HOSTNAME" '$1 == hostname {print $2}' "$CSV_PATH")
+    local found=0
 
-    if [ -z "$LICENSE_KEY" ]; then
+    # Read the CSV file and check for the system name
+    while IFS=, read -r id asset_name asset_type source_ip key; do
+        # Skip empty lines or headers
+        if [[ -z "$id" || "$id" == "ID" ]]; then
+            continue
+        fi
+
+        # Check if the asset name matches the hostname
+        if [[ "$asset_name" == "$HOSTNAME" ]]; then
+            echo "System is licensed for CloudWave HIDS Agent. License Key: $key"
+            found=1
+            break
+        fi
+    done < "$CSV_PATH"
+
+    # If not found, abort installation
+    if [[ $found -ne 1 ]]; then
         echo "System is not licensed for CloudWave HIDS Agent. Installation aborted."
         exit 1
-    else
-        echo "System is licensed for CloudWave HIDS Agent. License Key: $LICENSE_KEY"
     fi
 }
 
