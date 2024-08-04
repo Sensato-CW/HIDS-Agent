@@ -88,6 +88,7 @@ check_license() {
 
     # Read the CSV file and check for the system name
     while IFS=, read -r id asset_name asset_type source_ip key; do
+        echo "Checking asset: $asset_name"
         # Skip empty lines or headers
         if [[ -z "$id" || "$id" == "ID" ]]; then
             continue
