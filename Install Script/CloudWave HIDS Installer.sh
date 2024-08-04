@@ -120,9 +120,9 @@ create_preloaded_vars() {
     echo "Creating preloaded-vars.conf..."
 
     # Ensure the ossec-hids-master/etc directory exists
-    mkdir -p "ossec-hids-master/etc"
+    mkdir -p "$OSSEC_FOLDER/etc"
 
-    cat << EOF > "ossec-hids-master/etc/preloaded-vars.conf"
+    cat << EOF > "$OSSEC_FOLDER/etc/preloaded-vars.conf"
 USER_LANGUAGE="en"
 USER_NO_STOP="y"
 USER_INSTALL_TYPE="agent"
@@ -136,9 +136,9 @@ USER_UPDATE="n"
 EOF
 
     # Ensure the configuration file is readable
-    sudo chmod 644 "ossec-hids-master/etc/preloaded-vars.conf"
+    sudo chmod 644 "$OSSEC_FOLDER/etc/preloaded-vars.conf"
     echo "Preloaded vars file content:"
-    cat "ossec-hids-master/etc/preloaded-vars.conf"
+    cat "$OSSEC_FOLDER/etc/preloaded-vars.conf"
 }
 
 # Function to download and extract the latest OSSEC version
@@ -148,12 +148,12 @@ download_and_extract_ossec() {
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     tar -zxvf ossec.tar.gz
     OSSEC_FOLDER=$(tar -tf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
-    cd $OSSEC_FOLDER
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
+    cd "$OSSEC_FOLDER" || { echo "Failed to enter directory: $OSSEC_FOLDER. Installation aborted."; exit 1; }
     sudo ./install.sh -q
     sudo /var/ossec/bin/ossec-control start
     echo "OSSEC installation completed."
@@ -164,8 +164,8 @@ ensure_dependencies
 download_csv
 get_system_name
 IFS=',' read -r server_ip key <<< $(check_license)
-create_preloaded_vars "$server_ip" "$key"
 download_and_extract_ossec
+create_preloaded_vars "$server_ip" "$key"
 install_ossec
 
 echo "Automated OSSEC installation script finished."
