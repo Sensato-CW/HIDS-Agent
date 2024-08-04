@@ -4,7 +4,7 @@
 OSSEC_DIR="/var/ossec"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
-OSSEC_BASE_DIR="ossec-hids-master"
+OSSEC_BASE_DIR="./ossec-hids-master"
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
@@ -14,16 +14,16 @@ ensure_dependencies() {
         case "$ID" in
             ubuntu|debian)
                 sudo apt-get update
-                sudo apt-get install -y build-essential inotify-tools zlib1g-dev libpcre2-dev libevent-dev curl wget systemd
+                sudo apt-get install -y build-essential inotify-tools zlib1g-dev libpcre2-dev libevent-dev curl wget libsystemd-dev
                 ;;
             centos|rhel)
-                sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd
+                sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel
                 ;;
             fedora)
-                sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd
+                sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel
                 ;;
             opensuse|suse)
-                sudo zypper install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd
+                sudo zypper install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel
                 ;;
             *)
                 echo "Unsupported distribution: $ID"
@@ -57,7 +57,7 @@ import urllib.request
 try:
     urllib.request.urlretrieve('$CSV_URL', '$CSV_PATH')
     print('HIDS Keys CSV file downloaded successfully.')
-except Exception as e
+except Exception as e:
     print(f'Failed to download HIDS Keys CSV file with Python. Installation aborted: {e}')
     exit(1)
 " || exit 1
@@ -110,9 +110,6 @@ check_license() {
         exit 1
     fi
 
-    # Log extracted IP address and key for verification
-    echo "Extracted server IP: $server_ip, License Key: $key"
-
     # Return the server_ip and key for use in the preloaded-vars.conf
     echo "$server_ip,$key"
 }
@@ -147,13 +144,9 @@ download_and_extract_ossec() {
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     tar -zxvf ossec.tar.gz
-}
-
-# Function to find and cd into the extracted OSSEC directory
-find_and_cd_ossec() {
     OSSEC_FOLDER=$(tar -tf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
-    echo "Changing directory to OSSEC folder: $OSSEC_FOLDER"
-    cd $OSSEC_FOLDER || { echo "Failed to change directory to $OSSEC_FOLDER. Installation aborted."; exit 1; }
+    mv $OSSEC_FOLDER $OSSEC_BASE_DIR
+    cd $OSSEC_BASE_DIR
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
@@ -176,7 +169,6 @@ get_system_name
 IFS=',' read -r server_ip key <<< $(check_license)
 create_preloaded_vars "$server_ip" "$key"
 download_and_extract_ossec
-find_and_cd_ossec
 install_ossec
 
 echo "Automated OSSEC installation script finished."
