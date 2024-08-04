@@ -1,10 +1,20 @@
 #!/bin/bash
 
-# Get the directory of the current script
-SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+# URL to the HIDS Keys CSV file in the GitHub repository
+CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/d23baf61e2fdaa91bd544f690de881d159f3daac/Install%20Script/HIDS%20Keys.csv"
 
-# Path to the HIDS Keys CSV file
-CSV_PATH="$SCRIPT_DIR/HIDS Keys.csv"
+# Path to download the HIDS Keys CSV file
+CSV_PATH="/tmp/HIDS_Keys.csv"
+
+# Download the HIDS Keys CSV file
+download_csv() {
+    echo "Downloading HIDS Keys CSV file..."
+    if ! curl -sS -o "$CSV_PATH" "$CSV_URL"; then
+        echo "Failed to download HIDS Keys CSV file. Installation aborted."
+        exit 1
+    fi
+    echo "HIDS Keys CSV file downloaded successfully."
+}
 
 # Function to detect the Linux distribution
 detect_distro() {
@@ -117,6 +127,7 @@ install_suse() {
 }
 
 # Main script execution
+download_csv
 get_system_name
 check_license
 detect_distro
