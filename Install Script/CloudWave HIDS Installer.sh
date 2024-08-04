@@ -5,7 +5,6 @@ OSSEC_DIR="/var/ossec"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
 OSSEC_BASE_DIR="ossec-hids-master"
-SERVER_IP="10.0.3.126"
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
@@ -76,7 +75,7 @@ get_system_name() {
     echo "System name: $HOSTNAME"
 }
 
-# Function to check if the system is licensed and retrieve the key
+# Function to check if the system is licensed and retrieve the key and server IP
 check_license() {
     if [ ! -f "$CSV_PATH" ]; then
         echo "License file not found at $CSV_PATH"
@@ -85,9 +84,10 @@ check_license() {
 
     local found=0
     local key=""
+    local server_ip=""
 
     # Read the CSV file and check for the system name
-    while IFS=, read -r id asset_name asset_type source_ip key; do
+    while IFS=, read -r id asset_name asset_type source_ip license_key; do
         echo "Checking asset: $asset_name"
         # Skip empty lines or headers
         if [[ -z "$id" || "$id" == "ID" ]]; then
@@ -96,8 +96,10 @@ check_license() {
 
         # Check if the asset name matches the hostname
         if [[ "$asset_name" == "$HOSTNAME" ]]; then
-            echo "System is licensed for CloudWave HIDS Agent. License Key: $key"
+            echo "System is licensed for CloudWave HIDS Agent. License Key: $license_key"
             found=1
+            server_ip=$source_ip
+            key=$license_key
             break
         fi
     done < "$CSV_PATH"
@@ -108,13 +110,17 @@ check_license() {
         exit 1
     fi
 
-    # Return the key for use in the preloaded-vars.conf
-    echo "$key"
+    # Log extracted IP address and key for verification
+    echo "Extracted server IP: $server_ip, License Key: $key"
+
+    # Return the server_ip and key for use in the preloaded-vars.conf
+    echo "$server_ip,$key"
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
 create_preloaded_vars() {
-    local key="$1"
+    local server_ip="$1"
+    local key="$2"
     echo "Creating preloaded-vars.conf..."
     cat << EOF > "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
 USER_LANGUAGE="en"
@@ -124,7 +130,7 @@ USER_DIR="$OSSEC_DIR"
 USER_ENABLE_ACTIVE_RESPONSE="n"
 USER_ENABLE_SYSCHECK="y"
 USER_ENABLE_ROOTCHECK="y"
-USER_AGENT_SERVER_IP="$SERVER_IP"
+USER_AGENT_SERVER_IP="$server_ip"
 USER_AGENT_KEY="$key"
 USER_UPDATE="n"
 EOF
@@ -141,15 +147,25 @@ download_and_extract_ossec() {
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     tar -zxvf ossec.tar.gz
+}
+
+# Function to find and cd into the extracted OSSEC directory
+find_and_cd_ossec() {
     OSSEC_FOLDER=$(tar -tf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
-    cd $OSSEC_FOLDER
+    echo "Changing directory to OSSEC folder: $OSSEC_FOLDER"
+    cd $OSSEC_FOLDER || { echo "Failed to change directory to $OSSEC_FOLDER. Installation aborted."; exit 1; }
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
     sudo ./install.sh -q
-    sudo /var/ossec/bin/ossec-control start
+    if [ -f "/var/ossec/bin/ossec-control" ]; then
+        sudo /var/ossec/bin/ossec-control start
+    else
+        echo "/var/ossec/bin/ossec-control not found. Installation aborted."
+        exit 1
+    fi
     echo "OSSEC installation completed."
 }
 
@@ -157,9 +173,10 @@ install_ossec() {
 ensure_dependencies
 download_csv
 get_system_name
-key=$(check_license)
-create_preloaded_vars "$key"
+IFS=',' read -r server_ip key <<< $(check_license)
+create_preloaded_vars "$server_ip" "$key"
 download_and_extract_ossec
+find_and_cd_ossec
 install_ossec
 
 echo "Automated OSSEC installation script finished."
