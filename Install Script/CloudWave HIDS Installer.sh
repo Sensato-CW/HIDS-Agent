@@ -5,6 +5,7 @@ CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20
 
 # Path to download the HIDS Keys CSV file
 CSV_PATH="/tmp/HIDS_Keys.csv"
+OSSEC_DIR="/var/ossec"
 
 # Function to download the HIDS Keys CSV file using available tools
 download_csv() {
@@ -68,6 +69,8 @@ check_license() {
     fi
 
     local found=0
+    local key=""
+    local server_ip=""
 
     # Read the CSV file and check for the system name
     while IFS=, read -r id asset_name asset_type source_ip key; do
@@ -80,6 +83,8 @@ check_license() {
         if [[ "$asset_name" == "$HOSTNAME" ]]; then
             echo "System is licensed for CloudWave HIDS Agent. License Key: $key"
             found=1
+            server_ip=$source_ip
+            key=$key
             break
         fi
     done < "$CSV_PATH"
@@ -89,34 +94,73 @@ check_license() {
         echo "System is not licensed for CloudWave HIDS Agent. Installation aborted."
         exit 1
     fi
+
+    # Return the server_ip and key for use in the preloaded-vars.conf
+    echo "$server_ip,$key"
 }
 
-# Function to run the OSSEC install script with simulated input
-run_install() {
-    echo "Running OSSEC installer with simulated input..."
+# Function to install dependencies
+install_dependencies() {
+    echo "Installing required packages..."
+    case "$DISTRO" in
+        ubuntu|debian)
+            sudo apt-get update
+            sudo apt-get install -y build-essential inotify-tools zlib1g-dev libpcre2-dev libevent-dev
+            ;;
+        centos|rhel|oracle)
+            sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel
+            ;;
+        fedora)
+            sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel
+            ;;
+        suse|opensuse)
+            sudo zypper install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel
+            ;;
+        *)
+            echo "Unsupported distribution: $DISTRO"
+            exit 1
+            ;;
+    esac
+}
 
-    # Use a here-document to provide the required inputs
-    sudo ./install.sh << EOF
-# Send ENTER to proceed from the initial prompt
-\r
-agent
-y
-y
-y
+# Function to create the preloaded-vars.conf for unattended installation
+create_preloaded_vars() {
+    local server_ip="$1"
+    local key="$2"
+    cat << EOF > preloaded-vars.conf
+USER_LANGUAGE="en"
+USER_NO_STOP="y"
+USER_INSTALL_TYPE="agent"
+USER_DIR="$OSSEC_DIR"
+USER_ENABLE_ACTIVE_RESPONSE="y"
+USER_ENABLE_SYSCHECK="y"
+USER_ENABLE_ROOTCHECK="y"
+USER_AGENT_SERVER_IP="$server_ip"
+USER_AGENT_KEY="$key"
+USER_UPDATE="n"
+USER_WHITE_LIST="127.0.0.1"
 EOF
 }
 
 # Function to install OSSEC (CloudWave HIDS Agent)
 install_ossec() {
-    echo "Installing CloudWave HIDS Agent..."
+    echo "Installing CloudWave HIDS Agent (OSSEC)..."
 
-    wget https://github.com/ossec/ossec-hids/archive/master.tar.gz -O ossec.tar.gz
+    LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
+    wget $LATEST_RELEASE_URL -O ossec.tar.gz
     tar -zxvf ossec.tar.gz
+    OSSEC_FOLDER=$(tar -tf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
 
-    cd ossec-hids-master
+    cd $OSSEC_FOLDER
 
-    # Run the install script with automated input
-    run_install
+    # Get server IP and key from the license check
+    IFS=',' read -r server_ip key <<< $(check_license)
+
+    # Create preloaded-vars.conf for unattended installation
+    create_preloaded_vars "$server_ip" "$key"
+
+    # Run the install script using the preconfigured variables
+    sudo ./install.sh -q -f preloaded-vars.conf
 
     sudo /var/ossec/bin/ossec-control start
 
@@ -126,9 +170,8 @@ install_ossec() {
 # Main script execution
 download_csv
 get_system_name
-check_license
 detect_distro
-
+install_dependencies
 install_ossec
 
 echo "CloudWave HIDS Agent installation script finished."
