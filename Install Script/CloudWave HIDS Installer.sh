@@ -86,7 +86,7 @@ check_license() {
     local server_ip=""
 
     # Read the CSV file and check for the system name
-    while IFS=, read -r id asset_name asset_type source_ip key; do
+    while IFS=, read -r id asset_name asset_type source_ip retrieved_key; do
         echo "Checking asset: $asset_name"
         # Skip empty lines or headers
         if [[ -z "$id" || "$id" == "ID" ]]; then
@@ -95,10 +95,10 @@ check_license() {
 
         # Check if the asset name matches the hostname
         if [[ "$asset_name" == "$HOSTNAME" ]]; then
-            echo "System is licensed for CloudWave HIDS Agent. License Key: $key"
+            echo "System is licensed for CloudWave HIDS Agent. License Key: $retrieved_key"
             found=1
             server_ip=$source_ip
-            key=$key
+            key=$retrieved_key
             break
         fi
     done < "$CSV_PATH"
@@ -147,12 +147,13 @@ download_and_extract_ossec() {
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     tar -zxvf ossec.tar.gz
+    OSSEC_FOLDER=$(tar -tf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
+    cd $OSSEC_FOLDER
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
-    cd ossec-hids-master
     sudo ./install.sh -q
     sudo /var/ossec/bin/ossec-control start
     echo "OSSEC installation completed."
