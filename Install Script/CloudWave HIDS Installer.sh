@@ -128,7 +128,7 @@ USER_DIR="$OSSEC_DIR"
 USER_ENABLE_ACTIVE_RESPONSE="y"
 USER_ENABLE_SYSCHECK="y"
 USER_ENABLE_ROOTCHECK="y"
-USER_AGENT_SERVER_IP="$SERVER_IP"
+USER_AGENT_SERVER_IP="$server_ip"
 USER_AGENT_KEY="$key"
 USER_UPDATE="n"
 EOF
@@ -152,7 +152,7 @@ download_and_extract_ossec() {
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
-    sudo ./install.sh -f "$PRELOADED_VARS_PATH" || { echo "OSSEC installation failed."; exit 1; }
+    sudo ./install.sh -q -f "$PRELOADED_VARS_PATH" || { echo "OSSEC installation failed."; exit 1; }
     sudo /var/ossec/bin/ossec-control start
     echo "OSSEC installation completed."
 }
