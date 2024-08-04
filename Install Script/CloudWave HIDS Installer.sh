@@ -139,13 +139,14 @@ EOF
     cat "$PRELOADED_VARS_PATH"
 }
 
-# Function to download and extract the latest OSSEC version
+# Function to download and extract the latest OSSEC version without auto-installation
 download_and_extract_ossec() {
     echo "Downloading the latest OSSEC..."
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
-    tar -zxvf ossec.tar.gz
-    OSSEC_FOLDER=$(tar -tf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
+    tar -zxvf ossec.tar.gz --transform='s/.*\///'
+    OSSEC_FOLDER=$(tar -tzf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
+    echo "OSSEC extracted to folder: $OSSEC_FOLDER"
     cd $OSSEC_FOLDER
 }
 
