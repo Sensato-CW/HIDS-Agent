@@ -8,7 +8,7 @@ CSV_PATH="/tmp/HIDS_Keys.csv"
 SERVER_IP="10.0.3.126"
 
 # Function to ensure all dependencies are installed
-ensure_dependencies() {  # Line 13
+ensure_dependencies() {
     echo "Installing required packages..."
     if [ -f /etc/os-release ]; then
         . /etc/os-release
@@ -35,10 +35,10 @@ ensure_dependencies() {  # Line 13
         echo "Unable to determine OS distribution."
         exit 1
     fi
-}  # Line 40
+}
 
 # Function to download the HIDS Keys CSV file
-download_csv() {  # Line 43
+download_csv() {
     echo "Downloading HIDS Keys CSV file..."
 
     # Remove existing file if it exists
@@ -58,7 +58,7 @@ import urllib.request
 try:
     urllib.request.urlretrieve('$CSV_URL', '$CSV_PATH')
     print('HIDS Keys CSV file downloaded successfully.')
-except Exception as e
+except Exception as e:
     print(f'Failed to download HIDS Keys CSV file with Python. Installation aborted: {e}')
     exit(1)
 " || exit 1
@@ -68,16 +68,16 @@ except Exception as e
     fi
 
     echo "HIDS Keys CSV file downloaded successfully."
-}  # Line 77
+}
 
 # Function to get the hostname without the domain
-get_system_name() {  # Line 80
+get_system_name() {
     HOSTNAME=$(hostname -s)
     echo "System name: $HOSTNAME"
-}  # Line 83
+}
 
 # Function to check if the system is licensed and retrieve the key and server IP
-check_license() {  # Line 86
+check_license() {
     if [ ! -f "$CSV_PATH" ]; then
         echo "License file not found at $CSV_PATH"
         exit 1
@@ -113,10 +113,10 @@ check_license() {  # Line 86
 
     # Return the server_ip and key for use in the preloaded-vars.conf
     echo "$server_ip,$key"
-}  # Line 112
+}
 
 # Function to create the preloaded-vars.conf for unattended installation
-create_preloaded_vars() {  # Line 115
+create_preloaded_vars() {
     local server_ip="$1"
     local key="$2"
     echo "Creating preloaded-vars.conf..."
@@ -137,28 +137,28 @@ EOF
     sudo chmod 644 "$PRELOADED_VARS_PATH"
     echo "Preloaded vars file content:"
     cat "$PRELOADED_VARS_PATH"
-}  # Line 134
+}
 
 # Function to download and extract the latest OSSEC version
-download_and_extract_ossec() {  # Line 137
+download_and_extract_ossec() {
     echo "Downloading the latest OSSEC..."
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     tar -zxvf ossec.tar.gz
     OSSEC_FOLDER=$(tar -tf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
     cd $OSSEC_FOLDER
-}  # Line 146
+}
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
-install_ossec() {  # Line 149
+install_ossec() {
     echo "Installing OSSEC..."
-    sudo ./install.sh -q -f "$PRELOADED_VARS_PATH"
+    sudo ./install.sh -q -f "$PRELOADED_VARS_PATH" || { echo "OSSEC installation failed."; exit 1; }
     sudo /var/ossec/bin/ossec-control start
     echo "OSSEC installation completed."
-}  # Line 154
+}
 
 # Main script execution
-ensure_dependencies  # Line 157
+ensure_dependencies
 download_csv
 get_system_name
 IFS=',' read -r server_ip key <<< $(check_license)
