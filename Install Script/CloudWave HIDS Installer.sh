@@ -4,7 +4,7 @@
 OSSEC_DIR="/var/ossec"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
-OSSEC_BASE_DIR="/ossec-hids-master" # Change to the actual base directory
+OSSEC_BASE_DIR="/path/to/ossec-hids-master" # Change to the actual base directory
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
@@ -151,7 +151,7 @@ download_and_extract_ossec() {
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
-    sudo $OSSEC_BASE_DIR/install.sh -q
+    sudo ./install.sh -q
     sudo /var/ossec/bin/ossec-control start
     echo "OSSEC installation completed."
 }
@@ -163,6 +163,7 @@ get_system_name
 IFS=',' read -r server_ip key <<< $(check_license)
 create_preloaded_vars "$server_ip" "$key"
 download_and_extract_ossec
+cd "$OSSEC_BASE_DIR"
 install_ossec
 
 echo "Automated OSSEC installation script finished."
