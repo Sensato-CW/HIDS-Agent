@@ -5,6 +5,7 @@ OSSEC_DIR="/var/ossec"
 PRELOADED_VARS_PATH="/tmp/preloaded-vars.conf"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
+SERVER_IP="10.0.3.126"
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
@@ -57,7 +58,7 @@ import urllib.request
 try:
     urllib.request.urlretrieve('$CSV_URL', '$CSV_PATH')
     print('HIDS Keys CSV file downloaded successfully.')
-except Exception as e:
+except Exception as e
     print(f'Failed to download HIDS Keys CSV file with Python. Installation aborted: {e}')
     exit(1)
 " || exit 1
@@ -127,7 +128,7 @@ USER_DIR="$OSSEC_DIR"
 USER_ENABLE_ACTIVE_RESPONSE="y"
 USER_ENABLE_SYSCHECK="y"
 USER_ENABLE_ROOTCHECK="y"
-USER_AGENT_SERVER_IP="$server_ip"
+USER_AGENT_SERVER_IP="$SERVER_IP"
 USER_AGENT_KEY="$key"
 USER_UPDATE="n"
 USER_WHITE_LIST="127.0.0.1"
