@@ -141,8 +141,13 @@ download_and_extract_ossec() {
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     tar -zxvf ossec.tar.gz
-    OSSEC_FOLDER=$(tar -tf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
-    cd $OSSEC_FOLDER
+}
+
+# Function to find and change into the extracted OSSEC directory
+find_and_cd_ossec() {
+    OSSEC_FOLDER=$(tar -tzf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
+    echo "Changing directory to OSSEC folder: $OSSEC_FOLDER"
+    cd $OSSEC_FOLDER || { echo "Failed to change directory to $OSSEC_FOLDER. Installation aborted."; exit 1; }
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
@@ -158,8 +163,9 @@ ensure_dependencies
 download_csv
 get_system_name
 key=$(check_license)
-create_preloaded_vars "$key"
 download_and_extract_ossec
+find_and_cd_ossec
+create_preloaded_vars "$key"
 install_ossec
 
 echo "Automated OSSEC installation script finished."
