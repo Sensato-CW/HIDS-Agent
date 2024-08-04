@@ -5,7 +5,15 @@ OSSEC_DIR="/var/ossec"
 PRELOADED_VARS_PATH="/tmp/preloaded-vars.conf"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
-SERVER_IP="10.0.3.126"
+TEMP_DIR="/tmp/ossec_install_temp"
+INSTALL_DIR="/opt/ossec"
+
+# Ensure cleanup on exit
+cleanup() {
+    echo "Cleaning up temporary files..."
+    sudo rm -rf "$TEMP_DIR"
+}
+trap cleanup EXIT
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
@@ -142,12 +150,13 @@ EOF
 # Function to download and extract the latest OSSEC version without auto-installation
 download_and_extract_ossec() {
     echo "Downloading the latest OSSEC..."
+    mkdir -p "$TEMP_DIR"
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
-    wget $LATEST_RELEASE_URL -O ossec.tar.gz
-    tar -zxvf ossec.tar.gz --transform='s/.*\///'
-    OSSEC_FOLDER=$(tar -tzf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
+    wget $LATEST_RELEASE_URL -O "$TEMP_DIR/ossec.tar.gz"
+    tar -zxvf "$TEMP_DIR/ossec.tar.gz" -C "$TEMP_DIR"
+    OSSEC_FOLDER=$(tar -tzf "$TEMP_DIR/ossec.tar.gz" | head -n 1 | cut -d "/" -f 1)
     echo "OSSEC extracted to folder: $OSSEC_FOLDER"
-    cd $OSSEC_FOLDER
+    cd "$TEMP_DIR/$OSSEC_FOLDER"
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
