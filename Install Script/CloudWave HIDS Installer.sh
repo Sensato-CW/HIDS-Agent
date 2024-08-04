@@ -155,18 +155,8 @@ find_and_cd_ossec() {
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
-    if [ -f "./install.sh" ]; then
-        sudo ./install.sh -q
-    else
-        echo "install.sh script not found. Installation aborted."
-        exit 1
-    fi
-    if [ -f "/var/ossec/bin/ossec-control" ]; then
-        sudo /var/ossec/bin/ossec-control start
-    else
-        echo "/var/ossec/bin/ossec-control not found. Installation aborted."
-        exit 1
-    fi
+    sudo ./install.sh -q
+    sudo /var/ossec/bin/ossec-control start
     echo "OSSEC installation completed."
 }
 
