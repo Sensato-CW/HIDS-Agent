@@ -5,15 +5,7 @@ OSSEC_DIR="/var/ossec"
 PRELOADED_VARS_PATH="/tmp/preloaded-vars.conf"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
-TEMP_DIR="/tmp/ossec_install_temp"
-INSTALL_DIR="/opt/ossec"
-
-# Ensure cleanup on exit
-cleanup() {
-    echo "Cleaning up temporary files..."
-    sudo rm -rf "$TEMP_DIR"
-}
-trap cleanup EXIT
+SERVER_IP="10.0.3.126"
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
@@ -66,7 +58,7 @@ import urllib.request
 try:
     urllib.request.urlretrieve('$CSV_URL', '$CSV_PATH')
     print('HIDS Keys CSV file downloaded successfully.')
-except Exception as e:
+except Exception as e
     print(f'Failed to download HIDS Keys CSV file with Python. Installation aborted: {e}')
     exit(1)
 " || exit 1
@@ -136,7 +128,7 @@ USER_DIR="$OSSEC_DIR"
 USER_ENABLE_ACTIVE_RESPONSE="y"
 USER_ENABLE_SYSCHECK="y"
 USER_ENABLE_ROOTCHECK="y"
-USER_AGENT_SERVER_IP="$server_ip"
+USER_AGENT_SERVER_IP="$SERVER_IP"
 USER_AGENT_KEY="$key"
 USER_UPDATE="n"
 EOF
@@ -147,28 +139,27 @@ EOF
     cat "$PRELOADED_VARS_PATH"
 }
 
-# Function to download and extract the latest OSSEC version without auto-installation
+# Function to download and extract the latest OSSEC version
 download_and_extract_ossec() {
     echo "Downloading the latest OSSEC..."
-    mkdir -p "$TEMP_DIR"
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
-    wget $LATEST_RELEASE_URL -O "$TEMP_DIR/ossec.tar.gz"
-    
-    # Extract without execution
-    mkdir -p "$TEMP_DIR/ossec_extracted"
-    tar -xzvf "$TEMP_DIR/ossec.tar.gz" -C "$TEMP_DIR/ossec_extracted" --no-same-owner --no-overwrite-dir
-    
-    OSSEC_FOLDER=$(ls -d $TEMP_DIR/ossec_extracted/* | head -n 1)
-    echo "OSSEC extracted to folder: $OSSEC_FOLDER"
-    cd "$OSSEC_FOLDER"
+    wget $LATEST_RELEASE_URL -O ossec.tar.gz
+    tar -zxvf ossec.tar.gz
+    OSSEC_FOLDER=$(tar -tf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
+    cd $OSSEC_FOLDER
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
-    sudo ./install.sh -q -f "$PRELOADED_VARS_PATH" || { echo "OSSEC installation failed."; exit 1; }
-    sudo /var/ossec/bin/ossec-control start
-    echo "OSSEC installation completed."
+    if [ -f "$PRELOADED_VARS_PATH" ]; then
+        sudo ./install.sh -q -f "$PRELOADED_VARS_PATH"
+        sudo /var/ossec/bin/ossec-control start
+        echo "OSSEC installation completed."
+    else
+        echo "Preloaded vars file not found. Installation aborted."
+        exit 1
+    fi
 }
 
 # Main script execution
@@ -178,6 +169,11 @@ get_system_name
 IFS=',' read -r server_ip key <<< $(check_license)
 create_preloaded_vars "$server_ip" "$key"
 download_and_extract_ossec
+
+# Add a delay or confirmation step before proceeding with the installation
+echo "Pausing for 10 seconds before starting the installation..."
+sleep 10
+
 install_ossec
 
 echo "Automated OSSEC installation script finished."
