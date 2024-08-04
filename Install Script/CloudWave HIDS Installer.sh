@@ -153,10 +153,14 @@ download_and_extract_ossec() {
     mkdir -p "$TEMP_DIR"
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
     wget $LATEST_RELEASE_URL -O "$TEMP_DIR/ossec.tar.gz"
-    tar -zxvf "$TEMP_DIR/ossec.tar.gz" -C "$TEMP_DIR"
-    OSSEC_FOLDER=$(tar -tzf "$TEMP_DIR/ossec.tar.gz" | head -n 1 | cut -d "/" -f 1)
+    
+    # Extract without execution
+    mkdir -p "$TEMP_DIR/ossec_extracted"
+    tar -xzvf "$TEMP_DIR/ossec.tar.gz" -C "$TEMP_DIR/ossec_extracted" --no-same-owner --no-overwrite-dir
+    
+    OSSEC_FOLDER=$(ls -d $TEMP_DIR/ossec_extracted/* | head -n 1)
     echo "OSSEC extracted to folder: $OSSEC_FOLDER"
-    cd "$TEMP_DIR/$OSSEC_FOLDER"
+    cd "$OSSEC_FOLDER"
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
