@@ -5,6 +5,7 @@ CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20
 
 # Path to download the HIDS Keys CSV file
 CSV_PATH="/tmp/HIDS_Keys.csv"
+PRELOADED_VARS_PATH="/tmp/preloaded-vars.conf"
 OSSEC_DIR="/var/ossec"
 
 # Function to download the HIDS Keys CSV file using available tools
@@ -127,7 +128,7 @@ install_dependencies() {
 create_preloaded_vars() {
     local server_ip="$1"
     local key="$2"
-    cat << EOF > preloaded-vars.conf
+    cat << EOF > "$PRELOADED_VARS_PATH"
 USER_LANGUAGE="en"
 USER_NO_STOP="y"
 USER_INSTALL_TYPE="agent"
@@ -160,7 +161,7 @@ install_ossec() {
     create_preloaded_vars "$server_ip" "$key"
 
     # Run the install script using the preconfigured variables
-    sudo ./install.sh -q -f preloaded-vars.conf
+    sudo ./install.sh -q -f "$PRELOADED_VARS_PATH"
 
     sudo /var/ossec/bin/ossec-control start
 
