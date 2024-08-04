@@ -142,4 +142,28 @@ EOF
 # Function to download and extract the latest OSSEC version
 download_and_extract_ossec() {
     echo "Downloading the latest OSSEC..."
-    LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -
+    LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
+    wget $LATEST_RELEASE_URL -O ossec.tar.gz
+    tar -zxvf ossec.tar.gz
+    OSSEC_FOLDER=$(tar -tf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
+    cd $OSSEC_FOLDER
+}
+
+# Function to install OSSEC using the preloaded-vars.conf for unattended installation
+install_ossec() {
+    echo "Installing OSSEC..."
+    sudo ./install.sh -q -f "$PRELOADED_VARS_PATH"
+    sudo /var/ossec/bin/ossec-control start
+    echo "OSSEC installation completed."
+}
+
+# Main script execution
+ensure_dependencies
+download_csv
+get_system_name
+IFS=',' read -r server_ip key <<< $(check_license)
+create_preloaded_vars "$server_ip" "$key"
+download_and_extract_ossec
+install_ossec
+
+echo "Automated OSSEC installation script finished."
