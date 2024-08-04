@@ -95,13 +95,8 @@ check_license() {
 run_install() {
     echo "Running OSSEC installer with simulated input..."
 
-    # Expect the script to provide the required inputs
-    {
-        echo "agent"   # Answer for "What kind of installation do you want?"
-        echo "y"       # Answer for "Do you want to run the integrity check daemon?"
-        echo "y"       # Answer for "Do you want to enable active response?"
-        echo "y"       # Answer for "Do you want to start OSSEC HIDS after the installation?"
-    } | sudo ./install.sh
+    # Use printf to provide the required inputs
+    printf "agent\ny\ny\ny\n" | sudo ./install.sh
 }
 
 # Function to install OSSEC (CloudWave HIDS Agent)
@@ -113,7 +108,7 @@ install_ossec() {
 
     cd ossec-hids-master
 
-    # Run the modified install script with automated input
+    # Run the install script with automated input
     run_install
 
     sudo /var/ossec/bin/ossec-control start
