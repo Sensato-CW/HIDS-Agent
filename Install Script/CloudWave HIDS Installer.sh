@@ -152,7 +152,7 @@ download_and_extract_ossec() {
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
-    sudo ./install.sh -q -f "$PRELOADED_VARS_PATH" || { echo "OSSEC installation failed."; exit 1; }
+    sudo ./install.sh -f "$PRELOADED_VARS_PATH" || { echo "OSSEC installation failed."; exit 1; }
     sudo /var/ossec/bin/ossec-control start
     echo "OSSEC installation completed."
 }
