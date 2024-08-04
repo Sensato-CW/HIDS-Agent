@@ -6,17 +6,27 @@ CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/d23baf61e2fdaa9
 # Path to download the HIDS Keys CSV file
 CSV_PATH="/tmp/HIDS_Keys.csv"
 
-# Function to download the HIDS Keys CSV file
+# Function to download the HIDS Keys CSV file using available tools
 download_csv() {
     echo "Downloading HIDS Keys CSV file..."
 
-    # Check if wget is available, otherwise use curl
     if command -v wget > /dev/null; then
         wget -q -O "$CSV_PATH" "$CSV_URL" || { echo "Failed to download HIDS Keys CSV file with wget. Installation aborted."; exit 1; }
     elif command -v curl > /dev/null; then
         curl -sS -o "$CSV_PATH" "$CSV_URL" || { echo "Failed to download HIDS Keys CSV file with curl. Installation aborted."; exit 1; }
+    elif command -v python3 > /dev/null || command -v python > /dev/null; then
+        python_version=$(command -v python3 > /dev/null && echo "python3" || echo "python")
+        $python_version -c "
+import urllib.request
+try:
+    urllib.request.urlretrieve('$CSV_URL', '$CSV_PATH')
+    print('HIDS Keys CSV file downloaded successfully.')
+except Exception as e:
+    print(f'Failed to download HIDS Keys CSV file with Python. Installation aborted: {e}')
+    exit(1)
+" || exit 1
     else
-        echo "Neither wget nor curl is available to download files. Installation aborted."
+        echo "No suitable download tool available (wget, curl, python). Installation aborted."
         exit 1
     fi
 
