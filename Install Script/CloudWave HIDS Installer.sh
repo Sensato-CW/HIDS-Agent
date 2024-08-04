@@ -102,7 +102,9 @@ install_debian() {
     tar -zxvf ossec.tar.gz
 
     cd ossec-hids-master
-    sudo ./install.sh
+
+    # Automate the response to the installation prompt
+    echo -e "agent\n" | sudo ./install.sh
 
     sudo /var/ossec/bin/ossec-control start
 
@@ -120,7 +122,9 @@ install_rhel_based() {
     tar -zxvf ossec.tar.gz
 
     cd ossec-hids-master
-    sudo ./install.sh
+
+    # Automate the response to the installation prompt
+    echo -e "agent\n" | sudo ./install.sh
 
     sudo /var/ossec/bin/ossec-control start
 
@@ -138,7 +142,9 @@ install_fedora() {
     tar -zxvf ossec.tar.gz
 
     cd ossec-hids-master
-    sudo ./install.sh
+
+    # Automate the response to the installation prompt
+    echo -e "agent\n" | sudo ./install.sh
 
     sudo /var/ossec/bin/ossec-control start
 
@@ -156,7 +162,9 @@ install_suse() {
     tar -zxvf ossec.tar.gz
 
     cd ossec-hids-master
-    sudo ./install.sh
+
+    # Automate the response to the installation prompt
+    echo -e "agent\n" | sudo ./install.sh
 
     sudo /var/ossec/bin/ossec-control start
 
