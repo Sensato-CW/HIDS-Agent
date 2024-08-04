@@ -4,8 +4,8 @@
 OSSEC_DIR="/var/ossec"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
-OSSEC_BASE_DIR="ossec-hids-master"
 SERVER_IP="10.0.3.126"
+EXTRACT_DIR="./ossec-hids-master"
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
@@ -116,7 +116,8 @@ check_license() {
 create_preloaded_vars() {
     local key="$1"
     echo "Creating preloaded-vars.conf..."
-    cat << EOF > "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
+    mkdir -p "$EXTRACT_DIR/etc"
+    cat << EOF > "$EXTRACT_DIR/etc/preloaded-vars.conf"
 USER_LANGUAGE="en"
 USER_NO_STOP="y"
 USER_INSTALL_TYPE="agent"
@@ -130,9 +131,9 @@ USER_UPDATE="n"
 EOF
 
     # Ensure the configuration file is readable
-    sudo chmod 644 "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
+    sudo chmod 644 "$EXTRACT_DIR/etc/preloaded-vars.conf"
     echo "Preloaded vars file content:"
-    cat "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
+    cat "$EXTRACT_DIR/etc/preloaded-vars.conf"
 }
 
 # Function to download and extract the latest OSSEC version
@@ -140,19 +141,14 @@ download_and_extract_ossec() {
     echo "Downloading the latest OSSEC..."
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
-    tar -zxvf ossec.tar.gz
-}
-
-# Function to find and change into the extracted OSSEC directory
-find_and_cd_ossec() {
-    OSSEC_FOLDER=$(tar -tzf ossec.tar.gz | head -n 1 | cut -d "/" -f 1)
-    echo "Changing directory to OSSEC folder: $OSSEC_FOLDER"
-    cd $OSSEC_FOLDER || { echo "Failed to change directory to $OSSEC_FOLDER. Installation aborted."; exit 1; }
+    mkdir -p $EXTRACT_DIR
+    tar -zxvf ossec.tar.gz -C $EXTRACT_DIR --strip-components=1
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
+    cd $EXTRACT_DIR
     sudo ./install.sh -q
     sudo /var/ossec/bin/ossec-control start
     echo "OSSEC installation completed."
@@ -164,7 +160,6 @@ download_csv
 get_system_name
 key=$(check_license)
 download_and_extract_ossec
-find_and_cd_ossec
 create_preloaded_vars "$key"
 install_ossec
 
