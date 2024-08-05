@@ -109,7 +109,7 @@ check_license() {
     fi
 
     # Return the key
-    return "$key"
+    echo "$key"
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
@@ -160,7 +160,6 @@ create_client_keys() {
     sudo cat /var/ossec/etc/client.keys
 }
 
-
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
@@ -179,6 +178,5 @@ install_ossec
 
 echo "The key is $key"
 create_client_keys "$key"
-
 
 echo "Automated OSSEC installation script finished."
