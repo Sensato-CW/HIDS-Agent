@@ -145,19 +145,13 @@ download_and_extract_ossec() {
 }
 
 # Function to create the client.keys file for agent authentication
+# Function to create the client.keys file for agent authentication
 create_client_keys() {
     local encoded_key="$1"
 
     echo "Creating client.keys file..."
     # Decode the base64 key and write directly to the client.keys file
-    decoded_key=$(echo "$encoded_key" | base64 --decode)
-
-    # Use a temporary file and move it to the final destination with sudo
-    temp_file=$(mktemp)
-    echo "$decoded_key" > "$temp_file"
-    sudo mv "$temp_file" /var/ossec/etc/client.keys
-    sudo chmod 640 /var/ossec/etc/client.keys
-    sudo chown ossec:ossec /var/ossec/etc/client.keys
+    echo "$encoded_key" | base64 --decode | sudo tee /var/ossec/etc/client.keys > /dev/null
 
     echo "client.keys file created with content:"
     sudo cat /var/ossec/etc/client.keys
