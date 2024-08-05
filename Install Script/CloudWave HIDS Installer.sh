@@ -76,7 +76,7 @@ except Exception as e:
 get_system_name() {
     HOSTNAME=$(hostname -s)
     echo "System name: $HOSTNAME"
-    sleep 2
+    sleep 1
 }
 
 # Function to check if the system is licensed and retrieve the key
@@ -160,7 +160,7 @@ create_client_keys() {
     encoded_key=$(echo -n "$encoded_key" | tr -d '[:space:]')
 
     # Decode the base64 key and write directly to the client.keys file
-    decoded_key=$(echo -n "$encoded_key" | base64 --decode)
+    decoded_key=$("$encoded_key" | base64 --decode)
 	echo $decoded_key
     if [ $? -eq 0 ]; then
         echo "$decoded_key" | sudo tee /var/ossec/etc/client.keys > /dev/null
