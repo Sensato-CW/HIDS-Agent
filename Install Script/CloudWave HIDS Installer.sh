@@ -108,6 +108,9 @@ check_license() {
         exit 1
     fi
 
+    # Debugging the key value
+    echo "Using key: $key"
+
     # Return the key
     echo "$key"
 }
@@ -170,7 +173,5 @@ create_preloaded_vars
 download_and_extract_ossec
 install_ossec
 create_client_keys "$key"
-
-echo "Using key $key"
 
 echo "Automated OSSEC installation script finished."
