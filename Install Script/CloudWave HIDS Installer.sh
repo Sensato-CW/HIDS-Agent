@@ -58,7 +58,7 @@ import urllib.request
 try:
     urllib.request.urlretrieve('$CSV_URL', '$CSV_PATH')
     print('HIDS Keys CSV file downloaded successfully.')
-except Exception as e
+except Exception as e:
     print(f'Failed to download HIDS Keys CSV file with Python. Installation aborted: {e}')
     exit(1)
 " || exit 1
@@ -165,7 +165,6 @@ create_client_keys() {
     sudo cat /var/ossec/etc/client.keys
 }
 
-
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
@@ -177,7 +176,12 @@ install_ossec() {
 ensure_dependencies
 download_csv
 get_system_name
-key=$(check_license)
+
+# Ensure check_license is only called once
+if [ -z "$key" ]; then
+    key=$(check_license)
+fi
+
 create_preloaded_vars
 download_and_extract_ossec
 install_ossec
