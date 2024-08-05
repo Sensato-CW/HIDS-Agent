@@ -114,7 +114,6 @@ check_license() {
 
 # Function to create the preloaded-vars.conf for unattended installation
 create_preloaded_vars() {
-    local key="$1"
     echo "Creating preloaded-vars.conf..."
     cat << EOF > "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
 USER_LANGUAGE="en"
@@ -125,7 +124,6 @@ USER_ENABLE_ACTIVE_RESPONSE="n"
 USER_ENABLE_SYSCHECK="y"
 USER_ENABLE_ROOTCHECK="y"
 USER_AGENT_SERVER_IP="$SERVER_IP"
-USER_AGENT_KEY="$key"
 USER_UPDATE="n"
 EOF
 
@@ -148,7 +146,7 @@ download_and_extract_ossec() {
 # Function to create the client.keys file for agent authentication
 create_client_keys() {
     local encoded_key="$1"
-
+    echo $encoded_key
     echo "Creating client.keys file..."
     # Decode the base64 key and write directly to the client.keys file
     echo -n "$encoded_key" | base64 -d | sudo tee /var/ossec/etc/client.keys > /dev/null
