@@ -197,5 +197,7 @@ download_and_extract_ossec
 create_preloaded_vars
 install_ossec
 create_client_keys "$license_key"
+sleep 2
+sudo systemctl start ossec-service
 
 echo "Automated CloudWave HIDS installation script finished."
