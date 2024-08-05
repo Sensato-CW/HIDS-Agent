@@ -99,9 +99,9 @@ check_license() {
 
         # Check if the asset name matches the hostname
         if [[ "$asset_name" == "$HOSTNAME" ]]; then
+            license_key="$key"
             echo "System is licensed for CloudWave HIDS Agent. License Key: $key"
             found=1
-            license_key="$key"
             break
         fi
     done < "$CSV_PATH"
@@ -199,6 +199,6 @@ fi
 download_and_extract_ossec
 create_preloaded_vars
 install_ossec
-create_client_keys "$key"
+create_client_keys "$license_key"
 
 echo "Automated OSSEC installation script finished."
