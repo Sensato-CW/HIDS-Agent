@@ -9,7 +9,6 @@ SERVER_IP="10.0.3.126"
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
-    printf "\033c"
     echo "Installing required packages..."
     if [ -f /etc/os-release ]; then
         . /etc/os-release
@@ -82,7 +81,6 @@ get_system_name() {
 
 # Function to check if the system is licensed and retrieve the key
 check_license() {
-    printf "\033c"
     if [ ! -f "$CSV_PATH" ]; then
         echo "License file not found at $CSV_PATH"
         exit 1
