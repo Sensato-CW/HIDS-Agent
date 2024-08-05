@@ -169,7 +169,7 @@ get_system_name
 key=$(check_license)
 create_preloaded_vars
 download_and_extract_ossec
-create_client_keys "$key"
 install_ossec
+create_client_keys "$key"
 
 echo "Automated OSSEC installation script finished."
