@@ -146,7 +146,7 @@ download_and_extract_ossec() {
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     mkdir -p "$OSSEC_BASE_DIR"
     tar -zxvf ossec.tar.gz -C "$OSSEC_BASE_DIR" --strip-components=1
-    sleep 2
+    sleep 4
 }
 
 # Function to create the client.keys file for agent authentication
