@@ -153,6 +153,9 @@ create_client_keys() {
     # Trim any whitespace or newlines from the key
     encoded_key=$(echo -n "$encoded_key" | tr -d '[:space:]')
 
+    # Debugging: Show the length of the encoded key
+    echo "Length of encoded key: ${#encoded_key}"
+
     # Decode the base64 key and write directly to the client.keys file
     decoded_key=$(echo -n "$encoded_key" | base64 --decode 2>/dev/null)
     if [ $? -eq 0 ]; then
@@ -165,6 +168,7 @@ create_client_keys() {
     echo "client.keys file content:"
     sudo cat /var/ossec/etc/client.keys
 }
+
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
