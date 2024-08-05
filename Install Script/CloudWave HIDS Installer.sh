@@ -172,6 +172,6 @@ download_and_extract_ossec
 install_ossec
 create_client_keys "$key"
 
-echo "I got here"
+echo "I got here $key"
 
 echo "Automated OSSEC installation script finished."
