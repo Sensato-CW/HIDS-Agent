@@ -158,7 +158,7 @@ create_client_keys() {
 install_ossec() {
     echo "Installing OSSEC..."
     (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
-    sudo /var/ossec/bin/ossec-control start
+    #sudo /var/ossec/bin/ossec-control start
     echo "OSSEC installation completed."
 }
 
@@ -169,7 +169,7 @@ get_system_name
 key=$(check_license)
 create_preloaded_vars
 download_and_extract_ossec
-install_ossec
 create_client_keys "$key"
+install_ossec
 
 echo "Automated OSSEC installation script finished."
