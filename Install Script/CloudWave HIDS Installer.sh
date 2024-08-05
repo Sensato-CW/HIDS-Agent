@@ -152,7 +152,7 @@ download_and_extract_ossec() {
 
 # Function to create the client.keys file for agent authentication
 create_client_keys() {
-    clear >$(tty)
+    printf "
     local encoded_key="$1"
 
     echo "Creating client.keys file..."
@@ -178,7 +178,7 @@ create_client_keys() {
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
-    clear >$(tty)
+    printf "
     echo "Installing CloudWave HIDS..."
     (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
     echo "CloudWave HIDS installation completed. Licensing application"
@@ -200,7 +200,7 @@ download_and_extract_ossec
 create_preloaded_vars
 install_ossec
 create_client_keys "$license_key"
-clear >$(tty)
+printf "
 sudo /var/ossec/bin/ossec-control start
 sudo rm /tmp/HIDS_Keys.csv
 
