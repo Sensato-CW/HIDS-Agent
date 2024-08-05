@@ -199,8 +199,6 @@ fi
 download_and_extract_ossec
 create_preloaded_vars
 install_ossec
-
-echo "The key is $license_key"
-create_client_keys "$license_key"
+create_client_keys "$key"
 
 echo "Automated OSSEC installation script finished."
