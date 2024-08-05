@@ -145,17 +145,6 @@ download_and_extract_ossec() {
 }
 
 # Function to create the client.keys file for agent authentication
-#create_client_keys() {
-#    local encoded_key="$1"
-#
-#   echo "Creating client.keys file..."
-#   # Decode the base64 key and write directly to the client.keys file
-#    echo "$encoded_key" | base64 --decode | sudo tee /var/ossec/etc/client.keys > /dev/null
-
-#    echo "client.keys file created with content:"
-#    sudo cat /var/ossec/etc/client.keys
-#}
-# Function to create the client.keys file for agent authentication
 create_client_keys() {
     local encoded_key="$1"
 
@@ -178,6 +167,7 @@ create_client_keys() {
 install_ossec() {
     echo "Installing OSSEC..."
     (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
+    sudo /var/ossec/bin/ossec-control start
     echo "OSSEC installation completed."
 }
 
@@ -190,6 +180,5 @@ create_preloaded_vars "$key"
 download_and_extract_ossec
 create_client_keys "$key"
 install_ossec
-sudo /var/ossec/bin/ossec-control start
 
 echo "Automated OSSEC installation script finished."
