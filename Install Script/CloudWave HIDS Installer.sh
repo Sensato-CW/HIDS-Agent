@@ -172,7 +172,7 @@ create_preloaded_vars
 download_and_extract_ossec
 install_ossec
 
-echo $key
+echo "The key is $key"
 create_client_keys "$key"
 
 
