@@ -179,7 +179,7 @@ install_ossec() {
     echo "Installing OSSEC..."
     (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
     echo "CloudWave HIDS installation completed. Licensing application"
-    sleep 2
+    sleep 3
 }
 
 # Main script execution
@@ -191,7 +191,6 @@ get_system_name
 # Function to start services and perform cleanup
 complete_ossec() {
     echo "Completing configuration and starting services"
-    sleep 2
     sudo systemctl start ossec
 	sudo rm /tmp/HIDS_Keys.csv
 }
