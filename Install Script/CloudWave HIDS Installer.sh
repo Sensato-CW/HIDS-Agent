@@ -4,8 +4,7 @@
 OSSEC_DIR="/var/ossec"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
-SERVER_IP="10.0.3.126"
-EXTRACT_DIR="./ossec-hids-master"
+OSSEC_BASE_DIR="ossec-hids-master"
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
@@ -15,16 +14,16 @@ ensure_dependencies() {
         case "$ID" in
             ubuntu|debian)
                 sudo apt-get update
-                sudo apt-get install -y build-essential inotify-tools zlib1g-dev libpcre2-dev libevent-dev curl wget systemd
+                sudo apt-get install -y build-essential inotify-tools zlib1g-dev libpcre2-dev libevent-dev curl wget
                 ;;
             centos|rhel)
-                sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd
+                sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget
                 ;;
             fedora)
-                sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd
+                sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget
                 ;;
             opensuse|suse)
-                sudo zypper install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd
+                sudo zypper install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget
                 ;;
             *)
                 echo "Unsupported distribution: $ID"
@@ -76,7 +75,7 @@ get_system_name() {
     echo "System name: $HOSTNAME"
 }
 
-# Function to check if the system is licensed and retrieve the key
+# Function to check if the system is licensed and retrieve the key and server IP
 check_license() {
     if [ ! -f "$CSV_PATH" ]; then
         echo "License file not found at $CSV_PATH"
@@ -85,6 +84,7 @@ check_license() {
 
     local found=0
     local key=""
+    local server_ip=""
 
     # Read the CSV file and check for the system name
     while IFS=, read -r id asset_name asset_type source_ip key; do
@@ -98,6 +98,8 @@ check_license() {
         if [[ "$asset_name" == "$HOSTNAME" ]]; then
             echo "System is licensed for CloudWave HIDS Agent. License Key: $key"
             found=1
+            server_ip=$source_ip
+            key=$key
             break
         fi
     done < "$CSV_PATH"
@@ -108,16 +110,16 @@ check_license() {
         exit 1
     fi
 
-    # Return the key for use in the preloaded-vars.conf
-    echo "$key"
+    # Return the server_ip and key for use in the preloaded-vars.conf
+    echo "$server_ip,$key"
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
 create_preloaded_vars() {
-    local key="$1"
+    local server_ip="$1"
+    local key="$2"
     echo "Creating preloaded-vars.conf..."
-    mkdir -p "$EXTRACT_DIR/etc"
-    cat << EOF > "$EXTRACT_DIR/etc/preloaded-vars.conf"
+    cat << EOF > "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
 USER_LANGUAGE="en"
 USER_NO_STOP="y"
 USER_INSTALL_TYPE="agent"
@@ -125,15 +127,29 @@ USER_DIR="$OSSEC_DIR"
 USER_ENABLE_ACTIVE_RESPONSE="n"
 USER_ENABLE_SYSCHECK="y"
 USER_ENABLE_ROOTCHECK="y"
-USER_AGENT_SERVER_IP="$SERVER_IP"
+USER_AGENT_SERVER_IP="10.0.3.126"
 USER_AGENT_KEY="$key"
 USER_UPDATE="n"
 EOF
 
     # Ensure the configuration file is readable
-    sudo chmod 644 "$EXTRACT_DIR/etc/preloaded-vars.conf"
+    sudo chmod 644 "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
     echo "Preloaded vars file content:"
-    cat "$EXTRACT_DIR/etc/preloaded-vars.conf"
+    cat "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
+}
+
+# Function to decode base64 key and write client.keys file
+create_client_keys() {
+    local key="$1"
+    local decoded_key
+    echo "Creating client.keys file..."
+    decoded_key=$(echo "$key" | base64 -d)
+    cat << EOF > "/var/ossec/etc/client.keys"
+$decoded_key
+EOF
+
+    # Ensure the file is readable
+    sudo chmod 644 "/var/ossec/etc/client.keys"
 }
 
 # Function to download and extract the latest OSSEC version
@@ -141,15 +157,14 @@ download_and_extract_ossec() {
     echo "Downloading the latest OSSEC..."
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
-    mkdir -p $EXTRACT_DIR
-    tar -zxvf ossec.tar.gz -C $EXTRACT_DIR --strip-components=1
+    mkdir -p "$OSSEC_BASE_DIR"
+    tar -zxvf ossec.tar.gz -C "$OSSEC_BASE_DIR" --strip-components=1
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
     echo "Installing OSSEC..."
-    cd $EXTRACT_DIR
-    sudo ./install.sh -q
+    (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
     sudo /var/ossec/bin/ossec-control start
     echo "OSSEC installation completed."
 }
@@ -158,9 +173,10 @@ install_ossec() {
 ensure_dependencies
 download_csv
 get_system_name
-key=$(check_license)
+IFS=',' read -r server_ip key <<< $(check_license)
+create_preloaded_vars "$server_ip" "$key"
+create_client_keys "$key"
 download_and_extract_ossec
-create_preloaded_vars "$key"
 install_ossec
 
 echo "Automated OSSEC installation script finished."
