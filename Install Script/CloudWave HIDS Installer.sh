@@ -69,14 +69,14 @@ except Exception as e:
     fi
 
     echo "HIDS Keys CSV file downloaded successfully."
-    sleep 1
+    sleep 2
 }
 
 # Function to get the hostname without the domain
 get_system_name() {
     HOSTNAME=$(hostname -s)
     echo "System name: $HOSTNAME"
-    sleep 1
+    sleep 2
 }
 
 # Function to check if the system is licensed and retrieve the key
@@ -114,7 +114,7 @@ check_license() {
 
     # Return the key
     #echo "$license_key"
-    sleep 2
+    sleep 3
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
@@ -136,7 +136,7 @@ EOF
     sudo chmod 644 "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
     echo "Preloaded vars file content:"
     cat "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
-    sleep 2
+    sleep 3
 }
 
 # Function to download and extract the latest OSSEC version
@@ -146,7 +146,7 @@ download_and_extract_ossec() {
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     mkdir -p "$OSSEC_BASE_DIR"
     tar -zxvf ossec.tar.gz -C "$OSSEC_BASE_DIR" --strip-components=1
-    sleep 2
+    sleep 3
 }
 
 # Function to create the client.keys file for agent authentication
@@ -162,7 +162,7 @@ create_client_keys() {
 
     # Decode the base64 key and write directly to the client.keys file
     decoded_key=$(echo -n "$encoded_key" | base64 --decode)
-
+	echo $decoded_key
     if [ $? -eq 0 ]; then
         echo "$decoded_key" | sudo tee /var/ossec/etc/client.keys > /dev/null
         echo "client.keys file created successfully."
@@ -170,7 +170,7 @@ create_client_keys() {
         echo "Failed to decode the key. Please check the key format."
     fi
 
-    sleep 2
+    sleep 3
 }
 
 
@@ -180,19 +180,6 @@ install_ossec() {
     (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
     echo "CloudWave HIDS installation completed. Licensing application"
     sleep 3
-}
-
-# Main script execution
-ensure_dependencies
-download_csv
-get_system_name
-
-
-# Function to start services and perform cleanup
-complete_ossec() {
-    echo "Completing configuration and starting services"
-    sudo systemctl start ossec
-	sudo rm /tmp/HIDS_Keys.csv
 }
 
 # Main script execution
@@ -210,7 +197,7 @@ download_and_extract_ossec
 create_preloaded_vars
 install_ossec
 create_client_keys "$license_key"
-complete_ossec
-
+sleep 2
+sudo /var/ossec/bin/ossec-control start
 
 echo "Automated CloudWave HIDS installation script finished."
