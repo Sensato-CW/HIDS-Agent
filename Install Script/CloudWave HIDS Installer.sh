@@ -4,7 +4,8 @@
 OSSEC_DIR="/var/ossec"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
-OSSEC_BASE_DIR="ossec-hids-master"
+OSSEC_BASE_DIR="./ossec-hids-master"
+SERVER_IP="10.0.3.126"
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
@@ -84,7 +85,6 @@ check_license() {
 
     local found=0
     local key=""
-    local server_ip=""
 
     # Read the CSV file and check for the system name
     while IFS=, read -r id asset_name asset_type source_ip key; do
@@ -98,8 +98,6 @@ check_license() {
         if [[ "$asset_name" == "$HOSTNAME" ]]; then
             echo "System is licensed for CloudWave HIDS Agent. License Key: $key"
             found=1
-            server_ip=$source_ip
-            key=$key
             break
         fi
     done < "$CSV_PATH"
@@ -110,14 +108,13 @@ check_license() {
         exit 1
     fi
 
-    # Return the server_ip and key for use in the preloaded-vars.conf
-    echo "$server_ip,$key"
+    # Return the key for use in the preloaded-vars.conf
+    echo "$key"
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
 create_preloaded_vars() {
-    local server_ip="$1"
-    local key="$2"
+    local key="$1"
     echo "Creating preloaded-vars.conf..."
     cat << EOF > "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
 USER_LANGUAGE="en"
@@ -127,7 +124,7 @@ USER_DIR="$OSSEC_DIR"
 USER_ENABLE_ACTIVE_RESPONSE="n"
 USER_ENABLE_SYSCHECK="y"
 USER_ENABLE_ROOTCHECK="y"
-USER_AGENT_SERVER_IP="10.0.3.126"
+USER_AGENT_SERVER_IP="$SERVER_IP"
 USER_AGENT_KEY="$key"
 USER_UPDATE="n"
 EOF
@@ -138,20 +135,6 @@ EOF
     cat "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
 }
 
-# Function to decode base64 key and write client.keys file
-create_client_keys() {
-    local key="$1"
-    local decoded_key
-    echo "Creating client.keys file..."
-    decoded_key=$(echo "$key" | base64 -d)
-    cat << EOF > "/var/ossec/etc/client.keys"
-$decoded_key
-EOF
-
-    # Ensure the file is readable
-    sudo chmod 644 "/var/ossec/etc/client.keys"
-}
-
 # Function to download and extract the latest OSSEC version
 download_and_extract_ossec() {
     echo "Downloading the latest OSSEC..."
@@ -159,6 +142,18 @@ download_and_extract_ossec() {
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     mkdir -p "$OSSEC_BASE_DIR"
     tar -zxvf ossec.tar.gz -C "$OSSEC_BASE_DIR" --strip-components=1
+}
+
+# Function to create the client.keys file for agent authentication
+create_client_keys() {
+    local encoded_key="$1"
+
+    echo "Creating client.keys file..."
+    # Decode the base64 key and write directly to the client.keys file
+    echo "$encoded_key" | base64 --decode | sudo tee /var/ossec/etc/client.keys
+
+    echo "client.keys file created with content:"
+    cat /var/ossec/etc/client.keys
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
@@ -173,10 +168,10 @@ install_ossec() {
 ensure_dependencies
 download_csv
 get_system_name
-IFS=',' read -r server_ip key <<< $(check_license)
-create_preloaded_vars "$server_ip" "$key"
-create_client_keys "$key"
+key=$(check_license)
+create_preloaded_vars "$key"
 download_and_extract_ossec
+create_client_keys "$key"
 install_ossec
 
 echo "Automated OSSEC installation script finished."
