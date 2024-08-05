@@ -114,7 +114,7 @@ check_license() {
 
     # Return the key
     echo "$license_key"
-    sleep 2
+    sleep 4
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
@@ -136,7 +136,7 @@ EOF
     sudo chmod 644 "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
     echo "Preloaded vars file content:"
     cat "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
-    sleep 2
+    sleep 4
 }
 
 # Function to download and extract the latest OSSEC version
@@ -173,7 +173,7 @@ create_client_keys() {
 
     echo "client.keys file content:"
     sudo cat /var/ossec/etc/client.keys
-    sleep 2
+    sleep 4
 }
 
 
@@ -182,7 +182,7 @@ install_ossec() {
     echo "Installing OSSEC..."
     (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
     echo "OSSEC installation completed."
-    sleep 2
+    sleep 4
 }
 
 # Main script execution
@@ -195,8 +195,9 @@ if [ -z "$license_key" ]; then
     license_key=$(check_license)
 fi
 
-create_preloaded_vars
+
 download_and_extract_ossec
+create_preloaded_vars
 install_ossec
 
 echo "The key is $license_key"
