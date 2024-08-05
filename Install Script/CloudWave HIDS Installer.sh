@@ -136,7 +136,7 @@ EOF
     sudo chmod 644 "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
     echo "Preloaded vars file content:"
     cat "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
-    sleep 4
+    sleep 3
 }
 
 # Function to download and extract the latest OSSEC version
@@ -146,7 +146,7 @@ download_and_extract_ossec() {
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     mkdir -p "$OSSEC_BASE_DIR"
     tar -zxvf ossec.tar.gz -C "$OSSEC_BASE_DIR" --strip-components=1
-    sleep 4
+    sleep 3
 }
 
 # Function to create the client.keys file for agent authentication
@@ -163,7 +163,8 @@ create_client_keys() {
     echo "Length of encoded key: ${#encoded_key}"
 
     # Decode the base64 key and write directly to the client.keys file
-    decoded_key=$(echo -n "$encoded_key" | base64 --decode 2>/dev/null)
+    decoded_key=$(echo -n "$encoded_key" | base64 --decode)
+	echo $decoded_key
     if [ $? -eq 0 ]; then
         echo "$decoded_key" | sudo tee /var/ossec/etc/client.keys > /dev/null
         echo "client.keys file created successfully."
