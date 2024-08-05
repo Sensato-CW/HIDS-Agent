@@ -136,7 +136,7 @@ EOF
     sudo chmod 644 "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
     echo "Preloaded vars file content:"
     cat "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
-    sleep 3
+    sleep 2
 }
 
 # Function to download and extract the latest OSSEC version
@@ -162,7 +162,6 @@ create_client_keys() {
 
     # Decode the base64 key and write directly to the client.keys file
     decoded_key=$(echo -n "$encoded_key" | base64 --decode)
-	echo $decoded_key
     if [ $? -eq 0 ]; then
         echo "$decoded_key" | sudo tee /var/ossec/etc/client.keys > /dev/null
         echo "client.keys file created successfully."
@@ -199,5 +198,6 @@ install_ossec
 create_client_keys "$license_key"
 sleep 2
 sudo /var/ossec/bin/ossec-control start
+sudo rm /tmp/HIDS_KEYS.csv
 
 echo "Automated CloudWave HIDS installation script finished."
