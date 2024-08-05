@@ -141,7 +141,7 @@ EOF
 
 # Function to download and extract the latest OSSEC version
 download_and_extract_ossec() {
-    echo "Downloading the latest OSSEC..."
+    echo "Downloading the latest HIDS agent..."
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     mkdir -p "$OSSEC_BASE_DIR"
@@ -159,8 +159,6 @@ create_client_keys() {
     # Trim any whitespace or newlines from the key
     encoded_key=$(echo -n "$encoded_key" | tr -d '[:space:]')
 
-    # Debugging: Show the length of the encoded key
-    echo "Length of encoded key: ${#encoded_key}"
 
     # Decode the base64 key and write directly to the client.keys file
     decoded_key=$(echo -n "$encoded_key" | base64 --decode)
@@ -172,15 +170,13 @@ create_client_keys() {
         echo "Failed to decode the key. Please check the key format."
     fi
 
-    echo "client.keys file content:"
-    sudo cat /var/ossec/etc/client.keys
     sleep 4
 }
 
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
-    echo "Installing OSSEC..."
+    echo "Installing CloudWave HIDS..."
     (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
     echo "CloudWave HIDS installation completed. Licensing application"
     sleep 4
