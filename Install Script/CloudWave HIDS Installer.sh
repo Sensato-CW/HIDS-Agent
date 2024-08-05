@@ -9,6 +9,7 @@ SERVER_IP="10.0.3.126"
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
+    printf "\033c"
     echo "Installing required packages..."
     if [ -f /etc/os-release ]; then
         . /etc/os-release
@@ -81,6 +82,7 @@ get_system_name() {
 
 # Function to check if the system is licensed and retrieve the key
 check_license() {
+    printf "\033c"
     if [ ! -f "$CSV_PATH" ]; then
         echo "License file not found at $CSV_PATH"
         exit 1
@@ -152,7 +154,6 @@ download_and_extract_ossec() {
 
 # Function to create the client.keys file for agent authentication
 create_client_keys() {
-    printf "\033c"
     local encoded_key="$1"
 
     echo "Creating client.keys file..."
@@ -165,6 +166,7 @@ create_client_keys() {
     # Decode the base64 key and write directly to the client.keys file
     decoded_key=$(echo -n "$encoded_key" | base64 --decode)
 	echo $decoded_key
+	printf "\033c"
     if [ $? -eq 0 ]; then
         echo "$decoded_key" | sudo tee /var/ossec/etc/client.keys > /dev/null
         echo "client.keys file created successfully."
