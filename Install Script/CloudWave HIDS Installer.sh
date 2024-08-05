@@ -112,7 +112,7 @@ check_license() {
     echo "Using key: $key"
 
     # Return the key
-    echo "$key"
+    return "$key"
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
@@ -150,12 +150,14 @@ create_client_keys() {
     local encoded_key="$1"
 
     echo "Creating client.keys file..."
+    echo "Encoded key: $encoded_key"  # Debug line
     # Decode the base64 key and write directly to the client.keys file
     echo -n "$encoded_key" | base64 -d | sudo tee /var/ossec/etc/client.keys > /dev/null
 
     echo "client.keys file created with content:"
     sudo cat /var/ossec/etc/client.keys
 }
+
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
