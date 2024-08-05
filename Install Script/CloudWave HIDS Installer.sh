@@ -147,6 +147,7 @@ create_client_keys() {
     local encoded_key="$1"
 
     # Decode the base64 key and write directly to the client.keys file
+	echo -n "$encoded_key" | base64 -d
     echo -n "$encoded_key" | base64 -d | sudo tee /var/ossec/etc/client.keys > /dev/null
 }
 
@@ -165,8 +166,5 @@ key=$(check_license)
 create_preloaded_vars
 download_and_extract_ossec
 install_ossec
-
-echo "The key is $key"
-create_client_keys "$key"
 
 echo "Automated OSSEC installation script finished."
