@@ -171,6 +171,6 @@ create_preloaded_vars
 download_and_extract_ossec
 install_ossec
 create_client_keys "$key"
-echo $key
+echo "here"
 
 echo "Automated OSSEC installation script finished."
