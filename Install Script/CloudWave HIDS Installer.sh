@@ -159,9 +159,6 @@ create_client_keys() {
     # Trim any whitespace or newlines from the key
     encoded_key=$(echo -n "$encoded_key" | tr -d '[:space:]')
 
-    # Debugging: Show the length of the encoded key
-    echo "Length of encoded key: ${#encoded_key}"
-
     # Decode the base64 key and write directly to the client.keys file
     decoded_key=$(echo -n "$encoded_key" | base64 --decode)
 	echo $decoded_key
