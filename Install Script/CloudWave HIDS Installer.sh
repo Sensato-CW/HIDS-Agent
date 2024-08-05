@@ -84,7 +84,7 @@ check_license() {
     fi
 
     local found=0
-    local key=""
+    local license_key=""
 
     # Read the CSV file and check for the system name
     while IFS=, read -r id asset_name asset_type source_ip key; do
@@ -98,6 +98,7 @@ check_license() {
         if [[ "$asset_name" == "$HOSTNAME" ]]; then
             echo "System is licensed for CloudWave HIDS Agent. License Key: $key"
             found=1
+            license_key="$key"
             break
         fi
     done < "$CSV_PATH"
@@ -108,8 +109,8 @@ check_license() {
         exit 1
     fi
 
-    # Set the key
-    echo "$key"
+    # Return the key
+    echo "$license_key"
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
@@ -178,15 +179,15 @@ download_csv
 get_system_name
 
 # Ensure check_license is only called once
-if [ -z "$key" ]; then
-    key=$(check_license)
+if [ -z "$license_key" ]; then
+    license_key=$(check_license)
 fi
 
 create_preloaded_vars
 download_and_extract_ossec
 install_ossec
 
-echo "The key is $key"
-create_client_keys "$key"
+echo "The key is $license_key"
+create_client_keys "$license_key"
 
 echo "Automated OSSEC installation script finished."
