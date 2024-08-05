@@ -151,7 +151,7 @@ create_client_keys() {
 
     echo "Creating client.keys file..."
     # Decode the base64 key and write directly to the client.keys file
-    echo "$encoded_key" | base64 --decode | sudo tee /var/ossec/etc/client.keys > /dev/null
+    echo -n "$encoded_key" | base64 -d | sudo tee /var/ossec/etc/client.keys > /dev/null
 
     echo "client.keys file created with content:"
     sudo cat /var/ossec/etc/client.keys
