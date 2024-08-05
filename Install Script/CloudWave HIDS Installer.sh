@@ -114,7 +114,7 @@ check_license() {
 
     # Return the key
     #echo "$license_key"
-    sleep 3
+    sleep 4
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
@@ -159,6 +159,8 @@ create_client_keys() {
     # Trim any whitespace or newlines from the key
     encoded_key=$(echo -n "$encoded_key" | tr -d '[:space:]')
 
+    # Debugging: Show the length of the encoded key
+    echo "Length of encoded key: ${#encoded_key}"
 
     # Decode the base64 key and write directly to the client.keys file
     decoded_key=$(echo -n "$encoded_key" | base64 --decode)
@@ -170,7 +172,9 @@ create_client_keys() {
         echo "Failed to decode the key. Please check the key format."
     fi
 
-    sleep 3
+    echo "client.keys file content:"
+    sudo cat /var/ossec/etc/client.keys
+    sleep 4
 }
 
 
@@ -179,7 +183,7 @@ install_ossec() {
     echo "Installing OSSEC..."
     (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
     echo "CloudWave HIDS installation completed. Licensing application"
-    sleep 3
+    sleep 4
 }
 
 # Main script execution
@@ -197,7 +201,5 @@ download_and_extract_ossec
 create_preloaded_vars
 install_ossec
 create_client_keys "$license_key"
-sleep 2
-sudo  /var/ossec/bin/ossec-control start
 
 echo "Automated CloudWave HIDS installation script finished."
