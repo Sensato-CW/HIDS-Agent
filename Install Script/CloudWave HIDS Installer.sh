@@ -114,7 +114,7 @@ check_license() {
 
     # Return the key
     #echo "$license_key"
-    sleep 2
+    sleep 3
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
@@ -197,7 +197,7 @@ download_and_extract_ossec
 create_preloaded_vars
 install_ossec
 create_client_keys "$license_key"
-sleep 1
-sudo /var/ossec/bin/ossec-control start
+sleep 2
+sudo  /var/ossec/bin/ossec-control start
 
 echo "Automated CloudWave HIDS installation script finished."
