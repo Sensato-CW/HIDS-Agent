@@ -171,6 +171,7 @@ key=$(check_license)
 create_preloaded_vars
 download_and_extract_ossec
 install_ossec
+
 echo $key
 create_client_keys "$key"
 
