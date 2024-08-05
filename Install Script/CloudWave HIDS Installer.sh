@@ -35,6 +35,7 @@ ensure_dependencies() {
         echo "Unable to determine OS distribution."
         exit 1
     fi
+    sleep 2
 }
 
 # Function to download the HIDS Keys CSV file
@@ -68,12 +69,14 @@ except Exception as e:
     fi
 
     echo "HIDS Keys CSV file downloaded successfully."
+    sleep 2
 }
 
 # Function to get the hostname without the domain
 get_system_name() {
     HOSTNAME=$(hostname -s)
     echo "System name: $HOSTNAME"
+    sleep 2
 }
 
 # Function to check if the system is licensed and retrieve the key
@@ -111,6 +114,7 @@ check_license() {
 
     # Return the key
     echo "$license_key"
+    sleep 2
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
@@ -132,6 +136,7 @@ EOF
     sudo chmod 644 "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
     echo "Preloaded vars file content:"
     cat "$OSSEC_BASE_DIR/etc/preloaded-vars.conf"
+    sleep 2
 }
 
 # Function to download and extract the latest OSSEC version
@@ -141,6 +146,7 @@ download_and_extract_ossec() {
     wget $LATEST_RELEASE_URL -O ossec.tar.gz
     mkdir -p "$OSSEC_BASE_DIR"
     tar -zxvf ossec.tar.gz -C "$OSSEC_BASE_DIR" --strip-components=1
+    sleep 2
 }
 
 # Function to create the client.keys file for agent authentication
@@ -167,6 +173,7 @@ create_client_keys() {
 
     echo "client.keys file content:"
     sudo cat /var/ossec/etc/client.keys
+    sleep 2
 }
 
 
@@ -175,6 +182,7 @@ install_ossec() {
     echo "Installing OSSEC..."
     (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
     echo "OSSEC installation completed."
+    sleep 2
 }
 
 # Main script execution
