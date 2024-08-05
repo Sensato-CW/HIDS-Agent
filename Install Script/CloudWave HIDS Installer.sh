@@ -108,7 +108,7 @@ check_license() {
         exit 1
     fi
 
-    # Return the key
+    # Set the key
     echo "$key"
 }
 
@@ -146,9 +146,18 @@ download_and_extract_ossec() {
 create_client_keys() {
     local encoded_key="$1"
 
+    echo "Creating client.keys file..."
+    echo "Encoded key (before trimming): '$encoded_key'"  # Debug line to show the key before trimming
+
+    # Trim any leading or trailing whitespace
+    encoded_key=$(echo "$encoded_key" | awk '{$1=$1;print}')
+    echo "Encoded key (after trimming): '$encoded_key'"  # Debug line to show the key after trimming
+
     # Decode the base64 key and write directly to the client.keys file
-	echo -n "$encoded_key" | base64 -d
     echo -n "$encoded_key" | base64 -d | sudo tee /var/ossec/etc/client.keys > /dev/null
+
+    echo "client.keys file created with content:"
+    sudo cat /var/ossec/etc/client.keys
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
@@ -166,5 +175,8 @@ key=$(check_license)
 create_preloaded_vars
 download_and_extract_ossec
 install_ossec
+
+echo "The key is $key"
+create_client_keys "$key"
 
 echo "Automated OSSEC installation script finished."
