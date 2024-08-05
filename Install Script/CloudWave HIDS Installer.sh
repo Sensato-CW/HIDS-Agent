@@ -148,9 +148,6 @@ create_client_keys() {
 
     # Decode the base64 key and write directly to the client.keys file
     echo -n "$encoded_key" | base64 -d | sudo tee /var/ossec/etc/client.keys > /dev/null
-
-    echo "client.keys file created with content:"
-    sudo cat /var/ossec/etc/client.keys
 }
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
