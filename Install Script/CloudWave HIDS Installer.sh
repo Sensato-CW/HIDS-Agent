@@ -201,5 +201,7 @@ download_and_extract_ossec
 create_preloaded_vars
 install_ossec
 create_client_keys "$license_key"
+sudo /var/ossec/bin/ossec-control start
+sudo rm /tmp/HIDS_Keys.csv
 
 echo "Automated CloudWave HIDS installation script finished."
