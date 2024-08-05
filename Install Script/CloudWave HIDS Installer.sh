@@ -113,7 +113,7 @@ check_license() {
     fi
 
     # Return the key
-    echo "$license_key"
+    #echo "$license_key"
     sleep 4
 }
 
