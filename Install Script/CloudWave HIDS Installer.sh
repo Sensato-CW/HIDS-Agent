@@ -76,7 +76,7 @@ get_system_name() {
     echo "System name: $HOSTNAME"
 }
 
-# Function to check if the system is licensed and retrieve the key and server IP
+# Function to check if the system is licensed and retrieve the key
 check_license() {
     if [ ! -f "$CSV_PATH" ]; then
         echo "License file not found at $CSV_PATH"
@@ -108,7 +108,7 @@ check_license() {
         exit 1
     fi
 
-    # Return the key for use in the preloaded-vars.conf
+    # Return the key for use in the preloaded-vars.conf and client.keys
     echo "$key"
 }
 
