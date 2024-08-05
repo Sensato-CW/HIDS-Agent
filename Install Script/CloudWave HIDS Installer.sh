@@ -139,7 +139,7 @@ EOF
     sleep 2
 }
 
-# Function to download and extract the latest OSSEC version
+# Function to download and extract the latest HIDS version
 download_and_extract_ossec() {
     echo "Downloading the latest OSSEC..."
     LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/ossec/ossec-hids/releases/latest | grep "tarball_url" | cut -d '"' -f 4)
@@ -175,7 +175,7 @@ create_client_keys() {
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
-    echo "Installing OSSEC..."
+    echo "Installing HIDS agent..."
     (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
     echo "CloudWave HIDS installation completed. Licensing application"
     sleep 3
