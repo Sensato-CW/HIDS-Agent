@@ -18,7 +18,34 @@ ensure_dependencies() {
                 sudo apt-get install -y build-essential inotify-tools zlib1g-dev libpcre2-dev libevent-dev curl wget
                 ;;
             centos|rhel)
-                sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget
+                # Check if the system is registered with Red Hat subscription
+                if ! sudo subscription-manager status >/dev/null 2>&1; then
+                    echo "System is not registered with a Red Hat subscription. Attempting to install EPEL."
+                    sudo yum install -y epel-release
+                fi
+
+                # Try to enable additional repositories if needed
+                sudo subscription-manager repos --enable rhel-8-for-x86_64-appstream-rpms || echo "Failed to enable repositories, trying to install EPEL."
+
+                # Install the necessary packages
+                sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget || {
+                    echo "Some packages could not be installed via yum, attempting to install EPEL."
+                    sudo yum install -y epel-release
+                    sudo yum install -y libevent-devel
+                }
+
+                # If libevent-devel is still missing, consider building from source
+                if ! rpm -q libevent-devel >/dev/null 2>&1; then
+                    echo "libevent-devel not found, building from source."
+                    wget https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz
+                    tar -xvf libevent-2.1.12-stable.tar.gz
+                    cd libevent-2.1.12-stable
+                    ./configure
+                    make
+                    sudo make install
+                    cd ..
+                    rm -rf libevent-2.1.12-stable libevent-2.1.12-stable.tar.gz
+                fi
                 ;;
             fedora)
                 sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget
