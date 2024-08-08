@@ -40,8 +40,8 @@ ensure_dependencies() {
             fedora)
                 sudo dnf install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget systemd-devel openssl-devel
                 ;;
-            opensuse|suse)
-                sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget openssl-devel
+            opensuse|suse|sles)
+                sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget openssl-devel systemd-devel libsqlite3-devel autoconf automake libtool
                 ;;
             *)
                 echo "Unsupported distribution: $ID"
