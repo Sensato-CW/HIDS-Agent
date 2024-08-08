@@ -15,7 +15,8 @@ ensure_dependencies() {
         case "$ID" in
             ubuntu|debian)
                 sudo apt-get update
-                sudo apt-get install -y build-essential zlib1g-dev libpcre2-dev libevent-dev curl wget openssl libssl-dev
+                sudo apt-get install -y build-essential zlib1g-dev libpcre2-dev libevent-dev curl wget openssl libssl-dev \
+                autoconf automake libtool
                 ;;
             centos|rhel)
                 # Ensure system is registered and try to install EPEL manually if needed
@@ -211,6 +212,12 @@ fi
 
 # Debugging: Print the license key before using it
 echo "License key before creating client.keys: $license_key"
+
+# Clean build directory on Ubuntu to avoid conflicts
+if [ "$ID" == "ubuntu" ] || [ "$ID" == "debian" ]; then
+    echo "Cleaning previous build files for Ubuntu/Debian..."
+    sudo rm -rf "$OSSEC_BASE_DIR"
+fi
 
 download_and_extract_ossec
 create_preloaded_vars
