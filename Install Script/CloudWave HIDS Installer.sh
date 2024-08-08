@@ -66,7 +66,6 @@ ensure_dependencies() {
     sleep 2
 }
 
-
 # Function to download the HIDS Keys CSV file
 download_csv() {
     echo "Downloading HIDS Keys CSV file..."
@@ -120,7 +119,6 @@ check_license() {
 
     # Read the CSV file and check for the system name
     while IFS=, read -r id asset_name asset_type source_ip key; do
-        #echo "Checking asset: $asset_name"
         # Skip empty lines or headers
         if [[ -z "$id" || "$id" == "ID" ]]; then
             continue
@@ -142,8 +140,8 @@ check_license() {
     fi
 
     # Return the key
-    #echo "$license_key"
-    sleep 4
+    echo "$license_key"
+	sleep 4
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
@@ -189,21 +187,20 @@ create_client_keys() {
     # Trim any whitespace or newlines from the key
     encoded_key=$(echo -n "$encoded_key" | tr -d '[:space:]')
 
-
     # Decode the base64 key and write directly to the client.keys file
     decoded_key=$(echo -n "$encoded_key" | base64 --decode)
-	echo $decoded_key
-	#printf "\033[2J\033[H"
+    echo $decoded_key
+    #printf "\033[2J\033[H"
     if [ $? -eq 0 ]; then
         echo "$decoded_key" | sudo tee /var/ossec/etc/client.keys > /dev/null
         echo "client.keys file created successfully."
     else
         echo "Failed to decode the key. Please check the key format."
+        exit 1
     fi
 
     sleep 4
 }
-
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
@@ -224,6 +221,14 @@ if [ -z "$license_key" ]; then
     license_key=$(check_license)
 fi
 
+# Halt if the license key was not found
+if [ -z "$license_key" ]; then
+    echo "No license key found. Installation aborted."
+    exit 1
+fi
+
+# Debugging: Print the license key before using it
+echo "License key before creating client.keys: $license_key"
 
 download_and_extract_ossec
 create_preloaded_vars
