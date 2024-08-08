@@ -36,16 +36,11 @@ ensure_dependencies() {
                 sudo dnf install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget systemd-devel openssl-devel
                 ;;
             opensuse|suse|sles)
-<<<<<<< HEAD
                 # Remove existing repositories to avoid conflicts
                 sudo zypper removerepo openSUSE-OSS
                 sudo zypper removerepo openSUSE-Update-OSS
 
                 # Re-add repositories with GPG key auto-import
-=======
-=======
->>>>>>> 1d9740c1c02214ec435079a42a6b5e06f4a83aa1
-                # Enable necessary repositories
                 sudo zypper --gpg-auto-import-keys addrepo --check --refresh http://download.opensuse.org/distribution/leap/15.3/repo/oss/ openSUSE-OSS
                 sudo zypper --gpg-auto-import-keys addrepo --check --refresh http://download.opensuse.org/update/leap/15.3/oss/ openSUSE-Update-OSS
                 sudo zypper refresh
