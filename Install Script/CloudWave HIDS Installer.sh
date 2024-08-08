@@ -19,7 +19,6 @@ ensure_dependencies() {
                 libsqlite3-dev libsystemd-dev libcurl4-openssl-dev curl wget
                 ;;
             centos|rhel)
-                # Ensure system is registered and try to install EPEL manually if needed
                 if ! sudo subscription-manager status >/dev/null 2>&1; then
                     echo "System is not registered with a Red Hat subscription. Attempting to install EPEL manually."
                     sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm || {
@@ -27,11 +26,7 @@ ensure_dependencies() {
                         exit 1
                     }
                 fi
-
-                # Enable repositories and install necessary packages
                 sudo subscription-manager repos --enable rhel-8-for-x86_64-appstream-rpms || echo "Failed to enable repositories, trying to install EPEL manually."
-                
-                # Install packages including openssl-devel
                 sudo yum install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget systemd-devel openssl-devel || {
                     echo "Some packages could not be installed via yum."
                     exit 1
@@ -41,13 +36,23 @@ ensure_dependencies() {
                 sudo dnf install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget systemd-devel openssl-devel
                 ;;
             opensuse|suse|sles)
-                # Enable the required repositories if necessary
-                sudo zypper addrepo --check --refresh http://download.opensuse.org/distribution/leap/15.3/repo/oss/ openSUSE-OSS
-                sudo zypper addrepo --check --refresh http://download.opensuse.org/update/leap/15.3/oss/ openSUSE-Update-OSS
+                # Remove existing repositories to avoid conflicts
+                sudo zypper removerepo openSUSE-OSS
+                sudo zypper removerepo openSUSE-Update-OSS
+
+                # Re-add repositories with GPG key auto-import
+                sudo zypper --gpg-auto-import-keys addrepo --check --refresh http://download.opensuse.org/distribution/leap/15.3/repo/oss/ openSUSE-OSS
+                sudo zypper --gpg-auto-import-keys addrepo --check --refresh http://download.opensuse.org/update/leap/15.3/oss/ openSUSE-Update-OSS
                 sudo zypper refresh
 
-                # Install required packages
-                sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget openssl-devel systemd-devel libsqlite3-devel autoconf automake libtool || {
+                # Install development tools
+                sudo zypper install -t pattern devel_basis || {
+                    echo "Failed to install development tools pattern. Installation aborted."
+                    exit 1
+                }
+
+                # Install specific packages
+                sudo zypper install -y libopenssl-devel systemd-devel libsqlite3-devel autoconf automake libtool pcre2-devel zlib-devel libevent-devel || {
                     echo "Some packages could not be installed via zypper."
                     exit 1
                 }
