@@ -134,8 +134,7 @@ check_license() {
 
     # If not found, abort installation
     if [[ $found -ne 1 ]]; then
-        echo "System is not licensed for CloudWave HIDS Agent. Installation aborted."
-        exit 1
+        license_key="System is not licensed for CloudWave HIDS Agent. Installation aborted."
     fi
 
     # Return the key
@@ -215,9 +214,9 @@ get_system_name
 # Retrieve the license key
 license_key=$(check_license)
 
-# Halt if the license key was not found
-if [ -z "$license_key" ]; then
-    echo "No license key found. Installation aborted."
+# Halt if the license key was not found or is set to the error message
+if [ -z "$license_key" ] || [ "$license_key" == "System is not licensed for CloudWave HIDS Agent. Installation aborted." ]; then
+    echo "No valid license key found. Installation aborted."
     exit 1
 fi
 
