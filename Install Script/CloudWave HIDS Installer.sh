@@ -28,10 +28,10 @@ ensure_dependencies() {
                 sudo subscription-manager repos --enable rhel-8-for-x86_64-appstream-rpms || echo "Failed to enable repositories, trying to install EPEL."
 
                 # Install the necessary packages
-                sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel || {
+                sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget || {
                     echo "Some packages could not be installed via yum, attempting to install EPEL."
                     sudo yum install -y epel-release
-                    sudo yum install -y libevent-devel systemd-devel
+                    sudo yum install -y libevent-devel
                 }
 
                 # If libevent-devel is still missing, consider building from source
@@ -46,12 +46,9 @@ ensure_dependencies() {
                     cd ..
                     rm -rf libevent-2.1.12-stable libevent-2.1.12-stable.tar.gz
                 fi
-
-                # Ensure necessary OSSEC directories exist
-                sudo mkdir -p /var/ossec/etc
                 ;;
             fedora)
-                sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel
+                sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget
                 ;;
             opensuse|suse)
                 sudo zypper install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget
@@ -67,7 +64,6 @@ ensure_dependencies() {
     fi
     sleep 2
 }
-
 
 # Function to download the HIDS Keys CSV file
 download_csv() {
