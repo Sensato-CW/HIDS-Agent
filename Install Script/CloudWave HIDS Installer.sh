@@ -127,7 +127,6 @@ check_license() {
         # Check if the asset name matches the hostname
         if [[ "$asset_name" == "$HOSTNAME" ]]; then
             license_key="$key"
-            echo "$key"
             found=1
             break
         fi
@@ -141,7 +140,6 @@ check_license() {
 
     # Return the key
     echo "$license_key"
-	sleep 4
 }
 
 # Function to create the preloaded-vars.conf for unattended installation
@@ -190,7 +188,6 @@ create_client_keys() {
     # Decode the base64 key and write directly to the client.keys file
     decoded_key=$(echo -n "$encoded_key" | base64 --decode)
     echo $decoded_key
-    #printf "\033[2J\033[H"
     if [ $? -eq 0 ]; then
         echo "$decoded_key" | sudo tee /var/ossec/etc/client.keys > /dev/null
         echo "client.keys file created successfully."
@@ -204,7 +201,6 @@ create_client_keys() {
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
-    #printf "\033[2J\033[H"
     echo "Installing CloudWave HIDS..."
     (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
     echo "CloudWave HIDS installation completed. Licensing application"
@@ -216,10 +212,8 @@ ensure_dependencies
 download_csv
 get_system_name
 
-# Ensure check_license is only called once
-if [ -z "$license_key" ]; then
-    license_key=$(check_license)
-fi
+# Retrieve the license key
+license_key=$(check_license)
 
 # Halt if the license key was not found
 if [ -z "$license_key" ]; then
@@ -234,7 +228,7 @@ download_and_extract_ossec
 create_preloaded_vars
 install_ossec
 create_client_keys "$license_key"
-#printf "\033[2J\033[H"
+
 sudo /var/ossec/bin/ossec-control start
 sudo rm /tmp/HIDS_Keys.csv
 
