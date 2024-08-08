@@ -18,33 +18,27 @@ ensure_dependencies() {
                 sudo apt-get install -y build-essential inotify-tools zlib1g-dev libpcre2-dev libevent-dev curl wget
                 ;;
             centos|rhel)
-                # Check if the system is registered with Red Hat subscription
+                # Ensure system is registered and try to install EPEL manually if needed
                 if ! sudo subscription-manager status >/dev/null 2>&1; then
-                    echo "System is not registered with a Red Hat subscription. Attempting to install EPEL."
-                    sudo yum install -y epel-release
+                    echo "System is not registered with a Red Hat subscription. Attempting to install EPEL manually."
+                    sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm || {
+                        echo "Failed to install EPEL manually. Installation aborted."
+                        exit 1
+                    }
                 fi
 
-                # Try to enable additional repositories if needed
-                sudo subscription-manager repos --enable rhel-8-for-x86_64-appstream-rpms || echo "Failed to enable repositories, trying to install EPEL."
-
-                # Install the necessary packages including systemd-devel
+                # Enable repositories and install necessary packages
+                sudo subscription-manager repos --enable rhel-8-for-x86_64-appstream-rpms || echo "Failed to enable repositories, trying to install EPEL manually."
+                
+                # Install packages including inotify-tools from EPEL
                 sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel || {
-                    echo "Some packages could not be installed via yum, attempting to install EPEL."
-                    sudo yum install -y epel-release
-                    sudo yum install -y make gcc libevent-devel systemd-devel
+                    echo "Some packages could not be installed via yum."
+                    exit 1
                 }
 
-                # If libevent-devel is still missing, consider building from source
-                if ! rpm -q libevent-devel >/dev/null 2>&1; then
-                    echo "libevent-devel not found, building from source."
-                    wget https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz
-                    tar -xvf libevent-2.1.12-stable.tar.gz
-                    cd libevent-2.1.12-stable
-                    ./configure
-                    make
-                    sudo make install
-                    cd ..
-                    rm -rf libevent-2.1.12-stable libevent-2.1.12-stable.tar.gz
+                # If inotify-tools is not available, proceed without it
+                if ! rpm -q inotify-tools >/dev/null 2>&1; then
+                    echo "inotify-tools is not available. Skipping its installation."
                 fi
                 ;;
             fedora)
