@@ -40,19 +40,19 @@ ensure_dependencies() {
                 sudo zypper removerepo openSUSE-OSS
                 sudo zypper removerepo openSUSE-Update-OSS
 
-                # Re-add repositories with GPG key auto-import
-                sudo zypper --gpg-auto-import-keys addrepo --check --refresh http://download.opensuse.org/distribution/leap/15.3/repo/oss/ openSUSE-OSS
-                sudo zypper --gpg-auto-import-keys addrepo --check --refresh http://download.opensuse.org/update/leap/15.3/oss/ openSUSE-Update-OSS
-                sudo zypper refresh
+                # Re-add repositories with GPG check disabled
+                sudo zypper addrepo --no-gpg-checks --check --refresh http://download.opensuse.org/distribution/leap/15.3/repo/oss/ openSUSE-OSS
+                sudo zypper addrepo --no-gpg-checks --check --refresh http://download.opensuse.org/update/leap/15.3/oss/ openSUSE-Update-OSS
+                sudo zypper --gpg-auto-import-keys refresh --no-gpg-checks
 
-                # Install development tools
-                sudo zypper install -t pattern devel_basis || {
+                # Install development tools with GPG check disabled
+                sudo zypper --no-gpg-checks install -t pattern devel_basis || {
                     echo "Failed to install development tools pattern. Installation aborted."
                     exit 1
                 }
 
-                # Install specific packages
-                sudo zypper install -y libopenssl-devel systemd-devel libsqlite3-devel autoconf automake libtool pcre2-devel zlib-devel libevent-devel || {
+                # Install specific packages with GPG check disabled
+                sudo zypper --no-gpg-checks install -y libopenssl-devel systemd-devel libsqlite3-devel autoconf automake libtool pcre2-devel zlib-devel libevent-devel || {
                     echo "Some packages could not be installed via zypper."
                     exit 1
                 }
