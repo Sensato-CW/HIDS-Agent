@@ -41,13 +41,19 @@ ensure_dependencies() {
                 sudo dnf install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget systemd-devel openssl-devel
                 ;;
             opensuse|suse|sles)
-                # Enable the required repositories if necessary
-                sudo zypper addrepo --check --refresh http://download.opensuse.org/distribution/leap/15.3/repo/oss/ openSUSE-OSS
-                sudo zypper addrepo --check --refresh http://download.opensuse.org/update/leap/15.3/oss/ openSUSE-Update-OSS
+                # Enable necessary repositories
+                sudo zypper --gpg-auto-import-keys addrepo --check --refresh http://download.opensuse.org/distribution/leap/15.3/repo/oss/ openSUSE-OSS
+                sudo zypper --gpg-auto-import-keys addrepo --check --refresh http://download.opensuse.org/update/leap/15.3/oss/ openSUSE-Update-OSS
                 sudo zypper refresh
 
-                # Install required packages
-                sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget openssl-devel systemd-devel libsqlite3-devel autoconf automake libtool || {
+                # Install development tools
+                sudo zypper install -t pattern devel_basis || {
+                    echo "Failed to install development tools pattern. Installation aborted."
+                    exit 1
+                }
+
+                # Install specific packages
+                sudo zypper install -y libopenssl-devel systemd-devel libsqlite3-devel autoconf automake libtool pcre2-devel zlib-devel libevent-devel || {
                     echo "Some packages could not be installed via zypper."
                     exit 1
                 }
@@ -64,6 +70,7 @@ ensure_dependencies() {
 
     sleep 2
 }
+
 
 # Function to download the HIDS Keys CSV file
 download_csv() {
