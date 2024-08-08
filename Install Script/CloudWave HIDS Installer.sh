@@ -15,7 +15,7 @@ ensure_dependencies() {
         case "$ID" in
             ubuntu|debian)
                 sudo apt-get update
-                sudo apt-get install -y build-essential inotify-tools zlib1g-dev libpcre2-dev libevent-dev curl wget
+                sudo apt-get install -y build-essential zlib1g-dev libpcre2-dev libevent-dev curl wget
                 ;;
             centos|rhel)
                 # Ensure system is registered and try to install EPEL manually if needed
@@ -30,22 +30,17 @@ ensure_dependencies() {
                 # Enable repositories and install necessary packages
                 sudo subscription-manager repos --enable rhel-8-for-x86_64-appstream-rpms || echo "Failed to enable repositories, trying to install EPEL manually."
                 
-                # Install packages including inotify-tools from EPEL
-                sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel || {
+                # Install packages excluding inotify-tools
+                sudo yum install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget systemd-devel || {
                     echo "Some packages could not be installed via yum."
                     exit 1
                 }
-
-                # If inotify-tools is not available, proceed without it
-                if ! rpm -q inotify-tools >/dev/null 2>&1; then
-                    echo "inotify-tools is not available. Skipping its installation."
-                fi
                 ;;
             fedora)
-                sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel openssl-devel
+                sudo dnf install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget systemd-devel openssl-devel
                 ;;
             opensuse|suse)
-                sudo zypper install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget
+                sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget
                 ;;
             *)
                 echo "Unsupported distribution: $ID"
