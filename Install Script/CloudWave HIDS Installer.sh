@@ -31,7 +31,7 @@ ensure_dependencies() {
                 sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel || {
                     echo "Some packages could not be installed via yum, attempting to install EPEL."
                     sudo yum install -y epel-release
-                    sudo yum install -y libevent-devel systemd-devel
+                    sudo yum install -y make gcc libevent-devel systemd-devel
                 }
 
                 # If libevent-devel is still missing, consider building from source
@@ -132,7 +132,7 @@ check_license() {
         fi
     done < "$CSV_PATH"
 
-    # If not found, abort installation
+    # If not found, set an error message
     if [[ $found -ne 1 ]]; then
         license_key="System is not licensed for CloudWave HIDS Agent. Installation aborted."
     fi
