@@ -48,7 +48,7 @@ ensure_dependencies() {
                 fi
                 ;;
             fedora)
-                sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel
+                sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel openssl-devel
                 ;;
             opensuse|suse)
                 sudo zypper install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget
