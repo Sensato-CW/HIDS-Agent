@@ -15,8 +15,8 @@ ensure_dependencies() {
         case "$ID" in
             ubuntu|debian)
                 sudo apt-get update
-                sudo apt-get install -y build-essential zlib1g-dev libpcre2-dev libevent-dev curl wget openssl libssl-dev \
-                autoconf automake libtool
+                sudo apt-get install -y build-essential zlib1g-dev libpcre2-dev libevent-dev libssl-dev autoconf automake libtool \
+                libsqlite3-dev libsystemd-dev libcurl4-openssl-dev curl wget
                 ;;
             centos|rhel)
                 # Ensure system is registered and try to install EPEL manually if needed
