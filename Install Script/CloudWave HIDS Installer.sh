@@ -193,7 +193,7 @@ create_client_keys() {
     # Decode the base64 key and write directly to the client.keys file
     decoded_key=$(echo -n "$encoded_key" | base64 --decode)
 	echo $decoded_key
-	printf "\033c"
+	printf "\033[2J\033[H"
     if [ $? -eq 0 ]; then
         echo "$decoded_key" | sudo tee /var/ossec/etc/client.keys > /dev/null
         echo "client.keys file created successfully."
@@ -207,7 +207,7 @@ create_client_keys() {
 
 # Function to install OSSEC using the preloaded-vars.conf for unattended installation
 install_ossec() {
-    printf "\033c"
+    printf "\033[2J\033[H"
     echo "Installing CloudWave HIDS..."
     (cd "$OSSEC_BASE_DIR" && sudo ./install.sh -q)
     echo "CloudWave HIDS installation completed. Licensing application"
@@ -229,7 +229,7 @@ download_and_extract_ossec
 create_preloaded_vars
 install_ossec
 create_client_keys "$license_key"
-printf "\033c"
+printf "\033[2J\033[H"
 sudo /var/ossec/bin/ossec-control start
 sudo rm /tmp/HIDS_Keys.csv
 
