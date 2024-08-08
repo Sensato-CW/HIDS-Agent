@@ -46,9 +46,6 @@ ensure_dependencies() {
                     cd ..
                     rm -rf libevent-2.1.12-stable libevent-2.1.12-stable.tar.gz
                 fi
-
-                # Ensure necessary OSSEC directories exist
-                sudo mkdir -p /var/ossec/etc
                 ;;
             fedora)
                 sudo dnf install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel
@@ -65,6 +62,10 @@ ensure_dependencies() {
         echo "Unable to determine OS distribution."
         exit 1
     fi
+
+    # Ensure necessary OSSEC directories exist if they're required by the installer
+    sudo mkdir -p /var/ossec/etc
+
     sleep 2
 }
 
