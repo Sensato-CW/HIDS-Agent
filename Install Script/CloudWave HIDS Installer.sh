@@ -41,6 +41,8 @@ ensure_dependencies() {
                 sudo zypper removerepo openSUSE-Update-OSS
 
                 # Re-add repositories with GPG key auto-import
+=======
+                # Enable necessary repositories
                 sudo zypper --gpg-auto-import-keys addrepo --check --refresh http://download.opensuse.org/distribution/leap/15.3/repo/oss/ openSUSE-OSS
                 sudo zypper --gpg-auto-import-keys addrepo --check --refresh http://download.opensuse.org/update/leap/15.3/oss/ openSUSE-Update-OSS
                 sudo zypper refresh
@@ -69,6 +71,7 @@ ensure_dependencies() {
 
     sleep 2
 }
+
 
 # Function to download the HIDS Keys CSV file
 download_csv() {
