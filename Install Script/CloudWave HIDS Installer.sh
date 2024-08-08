@@ -41,7 +41,16 @@ ensure_dependencies() {
                 sudo dnf install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget systemd-devel openssl-devel
                 ;;
             opensuse|suse|sles)
-                sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget openssl-devel systemd-devel libsqlite3-devel autoconf automake libtool
+                # Enable the required repositories if necessary
+                sudo zypper addrepo --check --refresh http://download.opensuse.org/distribution/leap/15.3/repo/oss/ openSUSE-OSS
+                sudo zypper addrepo --check --refresh http://download.opensuse.org/update/leap/15.3/oss/ openSUSE-Update-OSS
+                sudo zypper refresh
+
+                # Install required packages
+                sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget openssl-devel systemd-devel libsqlite3-devel autoconf automake libtool || {
+                    echo "Some packages could not be installed via zypper."
+                    exit 1
+                }
                 ;;
             *)
                 echo "Unsupported distribution: $ID"
