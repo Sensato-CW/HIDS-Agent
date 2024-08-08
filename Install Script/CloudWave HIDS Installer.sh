@@ -27,7 +27,7 @@ ensure_dependencies() {
                 # Try to enable additional repositories if needed
                 sudo subscription-manager repos --enable rhel-8-for-x86_64-appstream-rpms || echo "Failed to enable repositories, trying to install EPEL."
 
-                # Install the necessary packages
+                # Install the necessary packages including systemd-devel
                 sudo yum install -y gcc make inotify-tools zlib-devel pcre2-devel libevent-devel curl wget systemd-devel || {
                     echo "Some packages could not be installed via yum, attempting to install EPEL."
                     sudo yum install -y epel-release
@@ -62,9 +62,6 @@ ensure_dependencies() {
         echo "Unable to determine OS distribution."
         exit 1
     fi
-
-    # Ensure necessary OSSEC directories exist if they're required by the installer
-    sudo mkdir -p /var/ossec/etc
 
     sleep 2
 }
