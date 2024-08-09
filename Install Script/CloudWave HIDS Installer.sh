@@ -47,16 +47,15 @@ ensure_dependencies() {
                     sudo zypper addrepo --refresh https://download.opensuse.org/tumbleweed/repo/oss/ openSUSE-Tumbleweed-OSS
                 elif [ "$ID" == "sles" ]; then
                     VERSION=$(grep VERSION_ID /etc/os-release | cut -d '=' -f2 | tr -d '"')
-                    # Attempt to add the SDK or relevant development repositories
-                    sudo SUSEConnect -p sle-module-development-tools/$VERSION/x86_64
-                    sudo SUSEConnect -p PackageHub/$VERSION/x86_64
+                    sudo zypper addrepo --refresh http://download.opensuse.org/repositories/devel:/tools/SLE_$VERSION/ devel-tools
+                    sudo zypper refresh
                 fi
 
                 # Refresh repositories
                 sudo zypper refresh
 
-                # Install specific packages for OSSEC
-                sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget libopenssl-devel systemd-devel libsqlite3-devel autoconf automake libtool || {
+                # Install specific packages for OSSEC, including alternative for libsqlite3-devel
+                sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget libopenssl-devel systemd-devel sqlite3-devel autoconf automake libtool || {
                     echo "Some packages could not be installed via zypper."
                     exit 1
                 }
