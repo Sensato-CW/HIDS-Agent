@@ -41,8 +41,8 @@ ensure_dependencies() {
                 # Refresh repositories
                 sudo zypper refresh
 
-                # Install specific packages for OSSEC, allowing already installed packages to be skipped
-                sudo zypper install -y --no-recommends gcc make zlib-devel pcre2-devel libevent-devel curl wget libopenssl-devel systemd-devel sqlite3-devel autoconf automake libtool || {
+                # Install specific packages for OSSEC
+                sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget libopenssl-devel systemd-devel sqlite3-devel autoconf automake libtool inotify-tools || {
                     echo "Some packages could not be installed via zypper."
                     exit 1
                 }
