@@ -7,6 +7,7 @@ CSV_PATH="/tmp/HIDS_Keys.csv"
 OSSEC_BASE_DIR="./ossec-hids-master"
 SERVER_IP="10.0.3.126"
 
+# Function to ensure all dependencies are installed
 ensure_dependencies() {
     echo "Installing required packages..."
     if [ -f /etc/os-release ]; then
@@ -35,6 +36,8 @@ ensure_dependencies() {
                 sudo dnf install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget systemd-devel openssl-devel
                 ;;
             opensuse|suse|sles)
+                echo "Installing required packages for SUSE..."
+
                 # Detect version of SUSE and set the correct repository URLs
                 if [ "$ID" == "opensuse-leap" ]; then
                     VERSION=$(grep VERSION_ID /etc/os-release | cut -d '=' -f2 | tr -d '"')
@@ -46,10 +49,13 @@ ensure_dependencies() {
                     VERSION=$(grep VERSION_ID /etc/os-release | cut -d '=' -f2 | tr -d '"')
                     sudo SUSEConnect -p sle-module-basesystem/$VERSION/x86_64
                     sudo SUSEConnect -p sle-module-desktop-applications/$VERSION/x86_64
+                    sudo zypper refresh
                 fi
 
-                # Refresh repositories and install specific packages
+                # Refresh repositories
                 sudo zypper refresh
+
+                # Install specific packages for OSSEC
                 sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget libopenssl-devel systemd-devel libsqlite3-devel autoconf automake libtool || {
                     echo "Some packages could not be installed via zypper."
                     exit 1
@@ -67,6 +73,7 @@ ensure_dependencies() {
 
     sleep 2
 }
+
 
 
 # Function to download the HIDS Keys CSV file
