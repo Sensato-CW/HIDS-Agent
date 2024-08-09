@@ -5,7 +5,7 @@ OSSEC_DIR="/var/ossec"
 CSV_URL="https://raw.githubusercontent.com/Sensato-CW/HIDS-Agent/main/Install%20Script/HIDS%20Keys.csv"
 CSV_PATH="/tmp/HIDS_Keys.csv"
 OSSEC_BASE_DIR="./ossec-hids-master"
-SERVER_IP="10.0.3.126"
+SERVER_IP="10.100.150.215"
 
 # Function to ensure all dependencies are installed
 ensure_dependencies() {
