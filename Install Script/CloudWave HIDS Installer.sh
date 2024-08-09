@@ -46,8 +46,10 @@ ensure_dependencies() {
                 elif [ "$ID" == "opensuse-tumbleweed" ]; then
                     sudo zypper addrepo --refresh https://download.opensuse.org/tumbleweed/repo/oss/ openSUSE-Tumbleweed-OSS
                 elif [ "$ID" == "sles" ]; then
-                    # For SLES, simply refresh repositories and attempt to install the required packages
-                    sudo zypper refresh
+                    VERSION=$(grep VERSION_ID /etc/os-release | cut -d '=' -f2 | tr -d '"')
+                    # Attempt to add the SDK or relevant development repositories
+                    sudo SUSEConnect -p sle-module-development-tools/$VERSION/x86_64
+                    sudo SUSEConnect -p PackageHub/$VERSION/x86_64
                 fi
 
                 # Refresh repositories
@@ -59,6 +61,7 @@ ensure_dependencies() {
                     exit 1
                 }
                 ;;
+
             *)
                 echo "Unsupported distribution: $ID"
                 exit 1
