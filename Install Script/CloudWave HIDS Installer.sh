@@ -47,7 +47,8 @@ ensure_dependencies() {
                     sudo zypper addrepo --refresh https://download.opensuse.org/tumbleweed/repo/oss/ openSUSE-Tumbleweed-OSS
                 elif [ "$ID" == "sles" ]; then
                     VERSION=$(grep VERSION_ID /etc/os-release | cut -d '=' -f2 | tr -d '"')
-                    sudo zypper addrepo --refresh http://download.opensuse.org/repositories/devel:/tools/SLE_$VERSION/ devel-tools
+                    # Correct repository URL for SLES
+                    sudo zypper addrepo --refresh https://download.opensuse.org/repositories/devel:/tools/SLE_$VERSION/devel-tools
                     sudo zypper refresh
                 fi
 
