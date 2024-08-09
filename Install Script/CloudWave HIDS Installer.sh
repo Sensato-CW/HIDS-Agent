@@ -38,25 +38,16 @@ ensure_dependencies() {
             opensuse|suse|sles)
                 echo "Installing required packages for SUSE..."
 
-                # Detect version of SUSE and skip adding invalid repository URLs
-                if [ "$ID" == "opensuse-leap" ]; then
-                    VERSION=$(grep VERSION_ID /etc/os-release | cut -d '=' -f2 | tr -d '"')
-                    sudo zypper addrepo --refresh https://download.opensuse.org/distribution/leap/$VERSION/repo/oss/ openSUSE-OSS
-                    sudo zypper addrepo --refresh https://download.opensuse.org/update/leap/$VERSION/oss/ openSUSE-Update-OSS
-                elif [ "$ID" == "opensuse-tumbleweed" ]; then
-                    sudo zypper addrepo --refresh https://download.opensuse.org/tumbleweed/repo/oss/ openSUSE-Tumbleweed-OSS
-                elif [ "$ID" == "sles" ]; then
-                    echo "SLES detected, skipping adding the invalid 'devel-tools' repository."
-                fi
-
                 # Refresh repositories
                 sudo zypper refresh
 
-                # Install specific packages for OSSEC, including alternatives
-                sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget libopenssl-devel systemd-devel sqlite3-devel autoconf automake libtool || {
+                # Install specific packages for OSSEC, allowing already installed packages to be skipped
+                sudo zypper install -y --no-recommends gcc make zlib-devel pcre2-devel libevent-devel curl wget libopenssl-devel systemd-devel sqlite3-devel autoconf automake libtool || {
                     echo "Some packages could not be installed via zypper."
                     exit 1
                 }
+
+                echo "Installation of dependencies completed for SUSE."
                 ;;
 
             *)
