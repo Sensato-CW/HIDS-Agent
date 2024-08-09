@@ -7,7 +7,6 @@ CSV_PATH="/tmp/HIDS_Keys.csv"
 OSSEC_BASE_DIR="./ossec-hids-master"
 SERVER_IP="10.0.3.126"
 
-# Function to ensure all dependencies are installed
 ensure_dependencies() {
     echo "Installing required packages..."
     if [ -f /etc/os-release ]; then
@@ -36,16 +35,21 @@ ensure_dependencies() {
                 sudo dnf install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget systemd-devel openssl-devel
                 ;;
             opensuse|suse|sles)
-                # Remove existing repositories to avoid conflicts
-                sudo zypper removerepo openSUSE-OSS
-                sudo zypper removerepo openSUSE-Update-OSS
+                # Detect version of SUSE and set the correct repository URLs
+                if [ "$ID" == "opensuse-leap" ]; then
+                    VERSION=$(grep VERSION_ID /etc/os-release | cut -d '=' -f2 | tr -d '"')
+                    sudo zypper addrepo --refresh https://download.opensuse.org/distribution/leap/$VERSION/repo/oss/ openSUSE-OSS
+                    sudo zypper addrepo --refresh https://download.opensuse.org/update/leap/$VERSION/oss/ openSUSE-Update-OSS
+                elif [ "$ID" == "opensuse-tumbleweed" ]; then
+                    sudo zypper addrepo --refresh https://download.opensuse.org/tumbleweed/repo/oss/ openSUSE-Tumbleweed-OSS
+                elif [ "$ID" == "sles" ]; then
+                    VERSION=$(grep VERSION_ID /etc/os-release | cut -d '=' -f2 | tr -d '"')
+                    sudo SUSEConnect -p sle-module-basesystem/$VERSION/x86_64
+                    sudo SUSEConnect -p sle-module-desktop-applications/$VERSION/x86_64
+                fi
 
-                # Re-add repositories with GPG check disabled
-                sudo zypper addrepo --gpg-auto-import-keys --check --refresh http://download.opensuse.org/distribution/leap/15.3/repo/oss/ openSUSE-OSS
-                sudo zypper addrepo --gpg-auto-import-keys --check --refresh http://download.opensuse.org/update/leap/15.3/oss/ openSUSE-Update-OSS
+                # Refresh repositories and install specific packages
                 sudo zypper refresh
-
-                # Install specific packages
                 sudo zypper install -y gcc make zlib-devel pcre2-devel libevent-devel curl wget libopenssl-devel systemd-devel libsqlite3-devel autoconf automake libtool || {
                     echo "Some packages could not be installed via zypper."
                     exit 1
