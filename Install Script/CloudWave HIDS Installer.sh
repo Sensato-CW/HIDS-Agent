@@ -46,9 +46,7 @@ ensure_dependencies() {
                 elif [ "$ID" == "opensuse-tumbleweed" ]; then
                     sudo zypper addrepo --refresh https://download.opensuse.org/tumbleweed/repo/oss/ openSUSE-Tumbleweed-OSS
                 elif [ "$ID" == "sles" ]; then
-                    VERSION=$(grep VERSION_ID /etc/os-release | cut -d '=' -f2 | tr -d '"')
-                    sudo SUSEConnect -p sle-module-basesystem/$VERSION/x86_64
-                    sudo SUSEConnect -p sle-module-desktop-applications/$VERSION/x86_64
+                    # For SLES, simply refresh repositories and attempt to install the required packages
                     sudo zypper refresh
                 fi
 
